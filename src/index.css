@@ -1,0 +1,632 @@
+@import url('https://fonts.cdnfonts.com/css/general-sans');
+@import "tailwindcss";
+
+* { scroll-behavior: smooth; }
+
+/* ════════════════════════════════════════════════════
+   DARK MODE — unchanged from your original palette
+   ════════════════════════════════════════════════════ */
+:root,
+html.dark {
+  --pink:     #fe2aa2;
+  --teal:     #19bdbd;
+  --lavender: #f3b6ff;
+  --blush:    #ffb2d7;
+
+  --bg-body:       #0d0514;
+  --bg-surface:    #130d1f;
+  --bg-card:       #1a1025;
+  --bg-card-hover: #201430;
+
+  --color-text:        #ffffff;
+  --color-text-muted:  rgba(255, 178, 215, 0.65);
+  --color-text-faint:  rgba(255, 178, 215, 0.4);
+
+  --border-card:       rgba(254, 42, 162, 0.12);
+  --border-card-hover: rgba(254, 42, 162, 0.32);
+
+  --nav-bg:          rgba(13, 5, 20, 0.82);
+  --nav-border:      rgba(254, 42, 162, 0.12);
+  --nav-sidebar-bg:  rgba(13, 5, 20, 0.97);
+
+  --copy-bg:          rgba(254, 42, 162, 0.08);
+  --copy-border:      rgba(254, 42, 162, 0.22);
+  --copy-bg-hover:    rgba(254, 42, 162, 0.15);
+  --copy-bg-done:     rgba(25, 189, 189, 0.10);
+  --copy-border-done: rgba(25, 189, 189, 0.35);
+
+  --headtext-color: #ffffff;
+  --subtext-color:  rgba(255, 178, 215, 0.55);
+  --navlink-color:  rgba(255, 178, 215, 0.65);
+
+  --input-bg:   #1a1025;
+  --input-text: #ffffff;
+
+  --work-bg:     rgba(26, 16, 37, 0.9);
+  --work-border: rgba(254, 42, 162, 0.15);
+
+  --client-bg:     rgba(26, 16, 37, 0.5);
+  --social-bg:     rgba(26, 16, 37, 0.8);
+  --social-border: rgba(254, 42, 162, 0.2);
+
+  --field-btn-bg: rgba(254, 42, 162, 0.15);
+  --arrow-btn-bg: rgba(254, 42, 162, 0.1);
+
+  /* Star field colours */
+  --star-plain:   rgba(255, 255, 255, 0.85);
+  --star-accent1: rgba(254, 42, 162, 0.90);
+  --star-accent2: rgba(25, 189, 189, 0.90);
+  --sparkle-col:  rgba(255, 255, 255, 0.70);
+  --orb1: rgba(124, 61, 232, 0.28);
+  --orb2: rgba(29, 219, 184, 0.17);
+  --orb3: rgba(185, 154, 245, 0.18);
+}
+
+/* ════════════════════════════════════════════════════
+   ✦  LIGHT MODE — Purple-Lilac × Turquoise
+      Replaces the old pinkish-white light mode
+   ════════════════════════════════════════════════════ */
+html.light {
+  /* Accent redefinitions */
+  --pink:     #7c3de8;   /* purple  — was hot-pink  */
+  --teal:     #0fc4a0;   /* turquoise — was cyan     */
+  --lavender: #c4a8ff;   /* soft purple highlight   */
+  --blush:    #ead5ff;   /* very light lilac        */
+
+  /* Backgrounds */
+  --bg-body:       #ede0ff;   /* soft lilac page        */
+  --bg-surface:    #e0ccff;   /* slightly deeper lilac  */
+  --bg-card:       #ffffff;   /* white card             */
+  --bg-card-hover: #f7f0ff;   /* barely-lilac hover     */
+
+  /* Text — fully legible on lilac/white backgrounds */
+  --color-text:        #1e0a4a;          /* deep indigo — base body text    */
+  --color-text-muted:  #5a3090;          /* solid purple — was semi-opaque  */
+  --color-text-faint:  #7a50a8;          /* lighter purple for hints        */
+
+  /* Borders */
+  --border-card:       rgba(124, 61, 232, 0.22);
+  --border-card-hover: rgba(124, 61, 232, 0.46);
+
+  /* Nav */
+  --nav-bg:          rgba(237, 224, 255, 0.88);
+  --nav-border:      rgba(124, 61, 232, 0.18);
+  --nav-sidebar-bg:  rgba(240, 228, 255, 0.98);
+
+  /* Copy widget */
+  --copy-bg:          rgba(124, 61, 232, 0.07);
+  --copy-border:      rgba(124, 61, 232, 0.22);
+  --copy-bg-hover:    rgba(124, 61, 232, 0.14);
+  --copy-bg-done:     rgba(15, 196, 160, 0.09);
+  --copy-border-done: rgba(15, 196, 160, 0.30);
+
+  /* Semantic text */
+  --headtext-color: #1e0a4a;
+  --subtext-color:  #5a3090;             /* solid — was rgba 0.68 opacity   */
+  --navlink-color:  #5a3090;
+
+  /* Experience description */
+  --exp-desc-color: #3d1f72;            /* deep purple, fully readable      */
+
+  /* Contact section text */
+  --contact-label-color:  #3d1f72;      /* field labels                     */
+  --contact-body-color:   #2a1260;      /* paragraph text                   */
+  --contact-placeholder:  #8b68b8;      /* input placeholder                */
+
+  /* Inputs */
+  --input-bg:   #f0e4ff;                /* slightly deeper so text pops     */
+  --input-text: #1e0a4a;
+
+  /* Work section */
+  --work-bg:     rgba(255, 255, 255, 0.90);
+  --work-border: rgba(124, 61, 232, 0.20);
+
+  /* Other surfaces */
+  --client-bg:     rgba(243, 234, 255, 0.65);
+  --social-bg:     rgba(255, 255, 255, 0.80);
+  --social-border: rgba(124, 61, 232, 0.25);
+
+  /* Buttons */
+  --field-btn-bg: rgba(124, 61, 232, 0.12);
+  --arrow-btn-bg: rgba(124, 61, 232, 0.09);
+
+  /* Star field — subtler, purple/teal tinted */
+  --star-plain:   rgba(90, 45, 180, 0.45);
+  --star-accent1: rgba(124, 61, 232, 0.65);
+  --star-accent2: rgba(15, 196, 160, 0.65);
+  --sparkle-col:  rgba(124, 61, 232, 0.55);
+  --orb1: rgba(124, 61, 232, 0.13);
+  --orb2: rgba(15, 196, 160, 0.11);
+  --orb3: rgba(180, 140, 255, 0.11);
+}
+
+/* ════════════════════════════════════════════════════
+   BODY
+   ════════════════════════════════════════════════════ */
+body {
+  background: var(--bg-body);
+  font-family: 'General Sans', sans-serif;
+  color: var(--color-text);
+  transition: background 0.35s ease, color 0.35s ease;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Light mode: layered gradient wash fills the page */
+html.light body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    145deg,
+    #e8d5ff 0%,
+    #d4b8ff 25%,
+    #c0a0ff 50%,
+    #9ae8dc 82%,
+    #80e0d0 100%
+  );
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* ════════════════════════════════════════════════════
+   STAR FIELD
+   Uses CSS variables so colours flip automatically
+   with the theme toggle — no JS changes needed.
+   ════════════════════════════════════════════════════ */
+.star-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Push all real content above the star layer */
+header.fixed,
+section,
+main,
+footer { position: relative; z-index: 1; }
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--star-plain);
+  animation: star-twinkle var(--dur, 3s) ease-in-out infinite var(--delay, 0s);
+}
+.star.accent1 { background: var(--star-accent1); }
+.star.accent2 { background: var(--star-accent2); }
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.12; transform: scale(0.7);  }
+  50%       { opacity: 1;    transform: scale(1.25); }
+}
+
+/* ✦ sparkle cross */
+.sparkle {
+  position: absolute;
+  pointer-events: none;
+  animation: sparkle-appear var(--dur, 5s) ease-in-out infinite var(--delay, 0s);
+}
+.sparkle::before,
+.sparkle::after {
+  content: '';
+  position: absolute;
+  background: var(--sparkle-col);
+  border-radius: 2px;
+}
+.sparkle::before {
+  width: var(--size, 12px); height: 2px;
+  top: 50%; left: 0;
+  transform: translateY(-50%);
+}
+.sparkle::after {
+  width: 2px; height: var(--size, 12px);
+  left: 50%; top: 0;
+  transform: translateX(-50%);
+}
+@keyframes sparkle-appear {
+  0%, 100% { opacity: 0; transform: rotate(0deg)  scale(0.4); }
+  30%, 70%  { opacity: 1; transform: rotate(45deg) scale(1);   }
+}
+
+/* Blurred floating orbs */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: orb-drift var(--dur, 12s) ease-in-out infinite alternate var(--delay, 0s);
+}
+.orb-1 { background: var(--orb1); filter: blur(90px);  width: 520px; height: 520px; top: -140px; left: -100px; }
+.orb-2 { background: var(--orb2); filter: blur(80px);  width: 380px; height: 380px; top: 40%;   right: -80px; }
+.orb-3 { background: var(--orb3); filter: blur(100px); width: 320px; height: 320px; bottom: 5%; left: 15%;    }
+@keyframes orb-drift {
+  from { transform: translate(0,    0)     scale(1);    }
+  to   { transform: translate(28px, -36px) scale(1.07); }
+}
+
+/* ════════════════════════════════════════════════════
+   NAVBAR
+   ════════════════════════════════════════════════════ */
+header.fixed {
+  background: var(--nav-bg) !important;
+  border-bottom: 1px solid var(--nav-border) !important;
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.nav-sidebar {
+  background: var(--nav-sidebar-bg) !important;
+  border-top: 1px solid var(--nav-border);
+  transition: background 0.3s ease;
+}
+
+.nav-li a,
+.nav-ul {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 20;
+}
+
+.nav-link {
+  color: var(--navlink-color);
+  text-decoration: none;
+  transition: color 0.25s, text-shadow 0.25s;
+  position: relative;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+}
+.nav-li a::after,
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--pink), var(--teal));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.nav-li a:hover,
+.nav-link:hover {
+  color: var(--pink);
+  text-shadow: 0 0 12px rgba(124, 61, 232, 0.4);
+}
+html.dark .nav-li a:hover,
+html.dark .nav-link:hover {
+  text-shadow: 0 0 12px rgba(254, 42, 162, 0.4);
+}
+.nav-li a:hover::after,
+.nav-link:hover::after { transform: scaleX(1); }
+
+/* ════════════════════════════════════════════════════
+   GRID CARDS (About)
+   ════════════════════════════════════════════════════ */
+.grid-container {
+  width: 100%; height: 100%;
+  border-radius: 20px;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  display: flex; flex-direction: column; gap: 1.25rem;
+  transition: border-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
+}
+.grid-container:hover {
+  border-color: var(--border-card-hover);
+  background: var(--bg-card-hover);
+  transform: translateY(-3px);
+}
+
+.grid-headtext {
+  font-size: 1.15rem; font-weight: 700;
+  color: var(--headtext-color);
+  margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
+}
+.grid-subtext {
+  font-size: 0.875rem; line-height: 1.65;
+  color: var(--subtext-color);
+  transition: color 0.3s ease;
+}
+
+/* ════════════════════════════════════════════════════
+   HERO TAG
+   ════════════════════════════════════════════════════ */
+.hero_tag {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700; text-align: center; line-height: 1.1;
+  background: linear-gradient(135deg, var(--pink) 0%, var(--lavender) 50%, var(--teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ════════════════════════════════════════════════════
+   COPY EMAIL WIDGET
+   ════════════════════════════════════════════════════ */
+.copy-container {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: var(--copy-bg);
+  border: 1px solid var(--copy-border);
+  border-radius: 12px; padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.3s, border-color 0.3s;
+}
+.copy-container:hover {
+  background: var(--copy-bg-hover);
+  border-color: rgba(124, 61, 232, 0.40);
+}
+html.dark .copy-container:hover {
+  border-color: rgba(254, 42, 162, 0.40);
+}
+
+/* ════════════════════════════════════════════════════
+   BUTTONS
+   ════════════════════════════════════════════════════ */
+.btn {
+  display: flex; gap: 1rem;
+  align-items: center; justify-content: center;
+  cursor: pointer; padding: 0.75rem;
+  border-radius: 0.375rem;
+  background: var(--field-btn-bg);
+  color: var(--color-text);
+  border: 1px solid var(--border-card);
+  transition: all 0.2s ease;
+}
+.btn:hover  { border-color: var(--border-card-hover); }
+.btn:active { transform: scale(0.95); }
+
+.btn-ping {
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+  position: absolute; display: inline-flex;
+  height: 100%; width: 100%;
+  border-radius: 9999px;
+  background-color: #4ade80; opacity: 0.75;
+}
+.btn-ping_dot {
+  position: relative; display: inline-flex;
+  border-radius: 9999px;
+  height: 0.75rem; width: 0.75rem;
+  background-color: #22c55e;
+}
+
+/* ════════════════════════════════════════════════════
+   ARROW BUTTON
+   ════════════════════════════════════════════════════ */
+.arrow-btn {
+  width: 2.5rem; height: 2.5rem; padding: 0.75rem;
+  cursor: pointer; border-radius: 9999px;
+  background: var(--arrow-btn-bg);
+  border: 1px solid var(--border-card);
+  transition: all 0.2s ease;
+}
+.arrow-btn:active { transform: scale(0.95); }
+
+/* ════════════════════════════════════════════════════
+   TECH LOGO CHIP
+   ════════════════════════════════════════════════════ */
+.tech-logo {
+  width: 2.5rem; height: 2.5rem;
+  border-radius: 0.375rem; padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(4px);
+  display: flex; justify-content: center; align-items: center;
+}
+html.light .tech-logo { background: rgba(124, 61, 232, 0.09); }
+
+/* ════════════════════════════════════════════════════
+   WORK / EXPERIENCE
+   ════════════════════════════════════════════════════ */
+.work-container {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.25rem; margin-top: 3rem;
+}
+@media (min-width: 1024px) {
+  .work-container { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.work-canvas {
+  grid-column: span 1; border-radius: 0.5rem;
+  background: var(--work-bg); border: 1px solid var(--work-border);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.work-content {
+  grid-column: span 2; border-radius: 0.5rem;
+  background: var(--work-bg); border: 1px solid var(--work-border);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.work-content_container {
+  display: grid; grid-template-columns: auto 1fr;
+  align-items: start; gap: 1.25rem;
+  transition: all 0.5s; cursor: pointer;
+  border-radius: 0.5rem; padding: 0 1.25rem;
+}
+.work-content_container:hover { background: var(--bg-card-hover); }
+.work-content_logo {
+  border-radius: 1.5rem; width: 4rem; height: 4rem;
+  padding: 0.5rem; background: var(--bg-card);
+}
+.work-content_bar {
+  flex: 1; width: 0.125rem; margin-top: 1rem;
+  height: 100%; background: var(--border-card);
+}
+
+/* ════════════════════════════════════════════════════
+   CLIENT / TESTIMONIALS
+   ════════════════════════════════════════════════════ */
+.client-container {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.25rem; margin-top: 3rem;
+}
+@media (min-width: 768px) {
+  .client-container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.client-review {
+  border-radius: 0.5rem; padding: 1.25rem;
+  grid-column: span 1;
+  background: var(--client-bg); border: 1px solid var(--border-card);
+  transition: background 0.3s ease;
+}
+@media (min-width: 768px) { .client-review { padding: 2.5rem; } }
+.client-content {
+  display: flex; flex-direction: column;
+  justify-content: space-between; align-items: flex-start;
+  gap: 1.25rem; margin-top: 1.75rem;
+}
+@media (min-width: 1024px) {
+  .client-content { flex-direction: row; align-items: center; }
+}
+
+/* ════════════════════════════════════════════════════
+   CONTACT
+   ════════════════════════════════════════════════════ */
+.contact-container {
+  max-width: 36rem; position: relative;
+  z-index: 10; padding: 0 1.25rem; margin-top: 3rem;
+}
+@media (min-width: 640px) { .contact-container { padding: 0 2.5rem; } }
+
+.field-label {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: color 0.3s ease;
+}
+/* Light mode: use the stronger label colour */
+html.light .field-label { color: var(--contact-label-color, #3d1f72); }
+
+.field-input {
+  width: 100%;
+  background: var(--input-bg); color: var(--input-text);
+  padding: 0.5rem 1.25rem; min-height: 3.5rem;
+  border-radius: 0.5rem; font-size: 1.125rem;
+  border: 1px solid var(--border-card);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.field-input::placeholder { color: var(--color-text-faint); opacity: 1; }
+html.light .field-input::placeholder { color: var(--contact-placeholder, #8b68b8); opacity: 1; }
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(124, 61, 232, 0.18);
+}
+html.dark .field-input:focus {
+  box-shadow: 0 0 0 3px rgba(254, 42, 162, 0.18);
+}
+
+/* Contact paragraph text */
+html.light .contact-body-text { color: var(--contact-body-color, #2a1260) !important; }
+
+.field-btn {
+  background: var(--field-btn-bg); color: var(--color-text);
+  padding: 0.5rem 1.25rem; min-height: 3rem;
+  border-radius: 0.5rem;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 1.125rem; gap: 0.75rem;
+  border: 1px solid var(--border-card);
+  transition: all 0.2s ease;
+}
+html.light .field-btn { color: #ffffff; background: var(--pink); border-color: transparent; }
+html.light .field-btn:hover { background: #6a2ed4; border-color: transparent; }
+
+.field-btn:hover {
+  border-color: var(--pink);
+  background: var(--copy-bg-hover);
+}
+.field-btn_arrow { width: 0.625rem; height: 0.625rem; object-fit: contain; }
+html.dark .field-btn_arrow  { filter: invert(1); }
+html.light .field-btn_arrow { filter: invert(1); } /* white icon on purple btn */
+
+/* ════════════════════════════════════════════════════
+   SOCIAL ICONS
+   ════════════════════════════════════════════════════ */
+.social-icon {
+  width: 3rem; height: 3rem; border-radius: 9999px;
+  display: flex; justify-content: center; align-items: center;
+  background: var(--social-bg); border: 1px solid var(--social-border);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* ════════════════════════════════════════════════════
+   HEAD-TEXT
+   ════════════════════════════════════════════════════ */
+.head-text {
+  font-weight: 600; font-size: 1.875rem;
+  color: var(--headtext-color);
+  transition: color 0.3s ease;
+}
+@media (min-width: 640px) { .head-text { font-size: 2.25rem; } }
+
+/* Light mode: gradient head-text for extra punch */
+html.light .head-text {
+  background: linear-gradient(135deg, var(--pink) 0%, #a855f7 50%, var(--teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Grid subtext — force readable colour in light mode */
+html.light .grid-subtext { color: #5a3090 !important; }
+
+/* Work name / title explicit colours for light mode */
+html.light .work-name  { color: #1e0a4a !important; }
+html.light .work-pos   { color: #0fc4a0 !important; }
+html.light .work-title { color: #5a3090 !important; }
+
+/* ════════════════════════════════════════════════════
+   GRADIENT TEXT UTILITY
+   ════════════════════════════════════════════════════ */
+.text-gray_gradient,
+.text-gray-gradient {
+  background: linear-gradient(135deg, var(--pink) 0%, var(--lavender) 50%, var(--teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ════════════════════════════════════════════════════
+   LAYOUT UTILITIES
+   ════════════════════════════════════════════════════ */
+.c-space { padding-left: 1.5rem; padding-right: 1.5rem; }
+@media (min-width: 640px)  { .c-space { padding-left: 2.5rem;  padding-right: 2.5rem;  } }
+@media (min-width: 1024px) { .c-space { padding-left: 5rem;    padding-right: 5rem;    } }
+
+/* ════════════════════════════════════════════════════
+   WAVING HAND
+   ════════════════════════════════════════════════════ */
+.waving-hand {
+  display: inline-block;
+  animation: wave-animation 2.5s infinite;
+  transform-origin: 70% 70%;
+}
+@keyframes wave-animation {
+  0%, 70%, 100% { transform: rotate(0deg);  }
+  15%  { transform: rotate(14deg);  }
+  30%  { transform: rotate(-8deg);  }
+  40%  { transform: rotate(14deg);  }
+  50%  { transform: rotate(-4deg);  }
+  60%  { transform: rotate(10deg);  }
+}
+
+/* ════════════════════════════════════════════════════
+   FOOTER BORDER
+   ════════════════════════════════════════════════════ */
+html.light footer.border-t { border-color: rgba(124, 61, 232, 0.20) !important; }
+html.dark  footer.border-t { border-color: rgba(254, 42, 162, 0.15) !important; }
+
+/* ════════════════════════════════════════════════════
+   SCROLLBAR
+   ════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--pink), var(--teal));
+  border-radius: 3px;
+}
