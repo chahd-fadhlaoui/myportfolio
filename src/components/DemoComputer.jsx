@@ -4,9 +4,9 @@ import { useGLTF, useAnimations, useVideoTexture } from "@react-three/drei";
 const DemoComputer = (props) => {
   const group = useRef();
   const { nodes, materials, animations } = useGLTF(
-    "models/lumen_64_spark__computer.glb",
+    "https://res.cloudinary.com/dq9nv66tj/image/upload/v1779626853/lumen_64_spark__computer-compressed_nqydgj.glb",
   );
-    const txt = useVideoTexture(props.texture ? props.texture : '/textures/project/project1.mp4')
+    const txt = useVideoTexture(props.texture ? props.texture : "https://res.cloudinary.com/dq9nv66tj/video/upload/v1779624839/project11_ujghsf.mp4")
  useEffect(() => {
     if (txt) {
       txt.flipY = false
@@ -3999,5 +3999,5 @@ const DemoComputer = (props) => {
   );
 };
 
-useGLTF.preload("models/lumen_64_spark__computer.glb");
+  useGLTF.preload("https://res.cloudinary.com/dq9nv66tj/image/upload/v1779626853/lumen_64_spark__computer-compressed_nqydgj.glb");
 export default DemoComputer;

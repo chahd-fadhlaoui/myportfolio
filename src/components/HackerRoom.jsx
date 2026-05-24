@@ -2,7 +2,7 @@ import { useGLTF, useTexture } from '@react-three/drei';
 import { useEffect } from 'react';
 
 export function HackerRoom(props) {
-  const { nodes, materials } = useGLTF('/models/hacker-room.glb');
+  const { nodes, materials } = useGLTF('https://res.cloudinary.com/dq9nv66tj/image/upload/v1779620624/hacker-room_ykmwj3.glb');
 
   const monitortxt = useTexture('textures/desk/monitor.png');
   const screenTxt = useTexture('textures/desk/image.png');
@@ -46,4 +46,4 @@ export function HackerRoom(props) {
   );
 }
 
-useGLTF.preload('/models/hacker-room.glb');
+useGLTF.preload('https://res.cloudinary.com/dq9nv66tj/image/upload/v1779620624/hacker-room_ykmwj3.glb');

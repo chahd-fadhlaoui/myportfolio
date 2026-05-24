@@ -1,7 +1,7 @@
 import { Float, useGLTF } from '@react-three/drei';
 
 const DockerLogo = (props) => {
-  const { nodes, materials } = useGLTF('models/moby_dock_docker_whale.glb');
+  const { nodes, materials } = useGLTF('https://res.cloudinary.com/dq9nv66tj/image/upload/v1779620503/moby_dock_docker_whale_ejoien.glb');
 
   return (
     <Float floatIntensity={1}>
@@ -59,4 +59,4 @@ const DockerLogo = (props) => {
 
 export default DockerLogo;
 
-useGLTF.preload('models/moby_dock_docker_whale.glb');
+useGLTF.preload('https://res.cloudinary.com/dq9nv66tj/image/upload/v1779620503/moby_dock_docker_whale_ejoien.glb');
