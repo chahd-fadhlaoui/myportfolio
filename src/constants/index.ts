@@ -24,7 +24,43 @@ export const navLinks = [
 
 
 export const myProjects = [
-
+  {
+  title: 'Animal adoption Pawfrind ',
+  desc: 'Designed and developed a web platform for animal adoption and veterinary appointment booking.',
+  subdesc:
+    'Architected a Full-Stack application using React, Node.js, and Express. Implemented a secure multi-role authentication system. Designed and managed a MongoDB database. Enhanced the user interface by building a responsive and intuitive experience.',
+  href: '#',
+  texture: 'https://res.cloudinary.com/dq9nv66tj/video/upload/v1785184674/Video_Project_3_x26st5.mp4',
+  logo: '/assets/project-logo2.png',
+  logoStyle: {
+    backgroundColor: '#2A1816',
+    border: '0.2px solid #36201D',
+    boxShadow: '0px 0px 60px 0px #AA3C304D',
+  },
+ tags: [
+      {
+        id: 1,
+        name: 'React.js',
+        path: '/assets/react.svg',
+      },
+      {
+        id: 2,
+        name: 'TailwindCSS',
+        path: 'assets/tailwindcss.png',
+      },
+      {
+        id: 3,
+        name: 'TypeScript',
+        path: '/assets/typescript.png',
+      },
+      {
+        id: 4,
+        name: 'Framer Motion',
+        path: '/assets/framer.png',
+      },
+    ],
+}
+,
   {
   title: 'Digital Printing Platform - Reference Print',
   desc: 'Developed a full-stack web platform for digital printing services, enabling users to create and manage print orders efficiently.',
