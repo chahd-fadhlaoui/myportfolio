@@ -1,98 +1,322 @@
-import { Suspense } from "react";
-import { HackerRoom } from "../components/HackerRoom";
-import { Canvas } from "@react-three/fiber";
-import { PerspectiveCamera } from "@react-three/drei";
-import { useMediaQuery } from "react-responsive";
-import { calculateSizes } from "../constants";
-import Target from "../components/Target";
-import ReactLogo from "../components/ReactLogo";
-import DockerLogo from "../components/DockerLogo";
-import WebDevModel from "../components/webdev";
-import HeroCamera from "../components/HeroCamera";
+import { useEffect, useRef, useState } from "react";
+import AnimatedCharacter from "../components/AnimatedCharacter";
 import Button from "../components/Button";
 
+/**
+ * Hero — full-bleed animated scene + baby-pink cursor glow.
+ *
+ * Layout is unchanged from the previous version: scene fills the section,
+ * headline top-left in the headroom above her head, CTA at the bottom.
+ * What this adds:
+ *   - baby-pink tokens, scoped to `.hero-bloom`, with a dedicated light and
+ *     dark treatment (dark = default, matching your `:root / html.dark`
+ *     convention; `html.light` = the soft baby-pink look)
+ *   - a pink glow that follows the pointer (rAF + CSS variables, no React
+ *     re-renders) and gently drifts on its own when the pointer is idle,
+ *     on touch screens, or after the pointer leaves
+ *   - the "Move your cursor around — go on." hint
+ */
 function Hero() {
-  const isSmall = useMediaQuery({ maxWidth: 440 });
-  const isMobile = useMediaQuery({ maxWidth: 768 });
-  const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1024 });
+  const heroRef = useRef(null);
+  const glowRef = useRef(null);
+  const copyRef = useRef(null);
 
-  const sizes = calculateSizes(isSmall, isMobile, isTablet);
+  // touch / no-hover devices get touch-appropriate copy
+  const [isTouch] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(hover: none)").matches
+  );
+  const [reduceMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    const glow = glowRef.current;
+    const copy = copyRef.current;
+    if (!hero || !glow) return;
+
+    // reduced motion: park the glow, no tracking, no parallax, no drift
+    if (reduceMotion) {
+      glow.style.setProperty("--gx", "68%");
+      glow.style.setProperty("--gy", "30%");
+      return;
+    }
+
+    const clamp = (v) => Math.max(0, Math.min(1, v));
+    let tx = 0.68, ty = 0.3; // target (0..1)
+    let cx = tx, cy = ty;    // eased current
+    let lastInput = -Infinity;
+    let raf = 0;
+    let running = false;
+    let engagedTimer = 0;
+
+    const setTarget = (clientX, clientY) => {
+      const r = hero.getBoundingClientRect();
+      tx = clamp((clientX - r.left) / r.width);
+      ty = clamp((clientY - r.top) / r.height);
+      lastInput = performance.now();
+      if (!hero.dataset.engaged && !engagedTimer) {
+        // hint has done its job — fade it a moment after first interaction
+        engagedTimer = window.setTimeout(() => {
+          hero.dataset.engaged = "true";
+        }, 2200);
+      }
+    };
+
+    const onPointerMove = (e) => setTarget(e.clientX, e.clientY);
+    const onTouch = (e) => {
+      const t = e.touches && e.touches[0];
+      if (t) setTarget(t.clientX, t.clientY);
+    };
+    const onLeave = () => {
+      lastInput = -Infinity; // hand control back to the idle drift
+    };
+
+    const tick = (t) => {
+      // idle: after 2.5s with no input the glow wanders slowly on its own
+      if (t - lastInput > 2500) {
+        tx = 0.5 + 0.3 * Math.cos(t / 4200);
+        ty = 0.42 + 0.2 * Math.sin(t / 5300);
+      }
+      cx += (tx - cx) * 0.08;
+      cy += (ty - cy) * 0.08;
+      glow.style.setProperty("--gx", (cx * 100).toFixed(2) + "%");
+      glow.style.setProperty("--gy", (cy * 100).toFixed(2) + "%");
+      if (copy) {
+        // very small parallax on the headline block (px, not %, so it can
+        // never push text toward the screen edge)
+        copy.style.transform = `translate3d(${((0.5 - cx) * 14).toFixed(2)}px, ${(
+          (0.5 - cy) *
+          8
+        ).toFixed(2)}px, 0)`;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    const start = () => {
+      if (running) return;
+      running = true;
+      raf = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    // only animate while the hero is on screen and the tab is visible
+    let inView = true;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        inView && !document.hidden ? start() : stop();
+      },
+      { threshold: 0 }
+    );
+    io.observe(hero);
+    const onVis = () => (document.hidden || !inView ? stop() : start());
+    document.addEventListener("visibilitychange", onVis);
+
+    hero.addEventListener("pointermove", onPointerMove, { passive: true });
+    hero.addEventListener("pointerleave", onLeave);
+    hero.addEventListener("touchstart", onTouch, { passive: true });
+    hero.addEventListener("touchmove", onTouch, { passive: true });
+    hero.addEventListener("touchend", onLeave);
+
+    return () => {
+      stop();
+      io.disconnect();
+      clearTimeout(engagedTimer);
+      document.removeEventListener("visibilitychange", onVis);
+      hero.removeEventListener("pointermove", onPointerMove);
+      hero.removeEventListener("pointerleave", onLeave);
+      hero.removeEventListener("touchstart", onTouch);
+      hero.removeEventListener("touchmove", onTouch);
+      hero.removeEventListener("touchend", onLeave);
+    };
+  }, [reduceMotion]);
 
   return (
     <section
-      className="min-h-screen w-full flex flex-col relative"
+      ref={heroRef}
       id="home"
-      style={{
-        background:
-          "radial-gradient(ellipse at 70% 20%, rgba(254,42,162,0.08) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(25,189,189,0.06) 0%, transparent 50%)",
-      }}
+      aria-label="Introduction"
+      className="hero-bloom min-h-screen w-full relative overflow-hidden"
     >
-      {/* TEXT */}
-      <div className="w-full mx-auto flex flex-col sm:mt-30 mt-20 c-space gap-3">
-        <p
-          className="sm:text-3xl text-xl font-medium text-center font-generalsans"
-          style={{ color: "rgba(255,178,215,0.9)" }}
-        >
-          Hi, I am chahd <span className="waving-hand">👋</span>
-        </p>
+      <style>{`
+        /* ── Hero tokens ───────────────────────────────────────────────
+           Default = dark (your :root / html.dark convention).
+           html.light = baby-pink look. Scoped to the hero only. */
+        .hero-bloom {
+          --hb-bg: #241f2e;
+          --hb-tint: linear-gradient(180deg, rgba(244,166,195,0.06), rgba(244,166,195,0.02));
+          --hb-top-v: linear-gradient(to bottom, rgba(26,12,30,0.80) 0%, rgba(26,12,30,0.42) 55%, rgba(26,12,30,0) 100%);
+          --hb-top-h: linear-gradient(100deg, rgba(26,12,30,0.74) 0%, rgba(26,12,30,0.40) 30%, rgba(26,12,30,0) 56%);
+          --hb-bottom: linear-gradient(to top, rgba(26,12,30,0.80) 0%, rgba(26,12,30,0.62) 45%, rgba(26,12,30,0) 100%);
+          --hb-greet: #ffc9de;
+          --hb-title: #ffffff;
+          --hb-title-shadow: 0 4px 18px rgba(0,0,0,0.45);
+          --hb-glow-core: rgba(255,182,213,0.34);
+          --hb-glow-mid: rgba(244,166,195,0.14);
+          --hb-glow-blend: screen;
+          --hb-pill-bg: rgba(26,12,30,0.62);
+          --hb-pill-fg: #ffd9e8;
+          --hb-pill-ring: rgba(255,182,213,0.30);
+          --hb-dot: #ffb6d5;
+          --hb-accent: #ffb6d5;
+          background: var(--hb-bg);
+        }
+        html.light .hero-bloom {
+          --hb-bg: #ffe9f1;
+          --hb-tint: linear-gradient(180deg, rgba(255,214,231,0.16), rgba(255,233,241,0.08));
+          --hb-top-v: linear-gradient(to bottom, rgba(255,226,238,0.90) 0%, rgba(255,226,238,0.55) 55%, rgba(255,226,238,0) 100%);
+          --hb-top-h: linear-gradient(100deg, rgba(255,226,238,0.90) 0%, rgba(255,226,238,0.58) 30%, rgba(255,226,238,0) 56%);
+          --hb-bottom: linear-gradient(to top, rgba(255,226,238,0.92) 0%, rgba(255,226,238,0.78) 45%, rgba(255,226,238,0) 100%);
+          --hb-greet: #8f1d54;
+          --hb-title: #3a1030;
+          --hb-title-shadow: 0 1px 0 rgba(255,255,255,0.6);
+          --hb-glow-core: rgba(255,170,205,0.34);
+          --hb-glow-mid: rgba(255,198,222,0.14);
+          --hb-glow-blend: normal;
+          --hb-pill-bg: rgba(255,255,255,0.78);
+          --hb-pill-fg: #7a1f4d;
+          --hb-pill-ring: rgba(214,92,148,0.32);
+          --hb-dot: #d65c94;
+          --hb-accent: #c9487f;
+        }
 
-        <p
-          className="hero_tag"
-          style={{
-            background: "linear-gradient(135deg, #fe2aa2 0%, #f3b6ff 50%, #19bdbd 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
-Full-Stack Web Developer    
-    </p>
+        .hero-bloom .hb-tint,
+        .hero-bloom .hb-top,
+        .hero-bloom .hb-bottom,
+        .hero-bloom .hb-glow { position: absolute; pointer-events: none; }
+        .hero-bloom .hb-tint   { inset: 0; z-index: 5;  background: var(--hb-tint); }
+        .hero-bloom .hb-glow   {
+          inset: 0; z-index: 6;
+          background: radial-gradient(
+            clamp(320px, 42vw, 760px) circle at var(--gx, 68%) var(--gy, 30%),
+            var(--hb-glow-core) 0%, var(--hb-glow-mid) 42%, transparent 72%);
+          mix-blend-mode: var(--hb-glow-blend);
+        }
+        /* phones: headline spans the width, so the wash is a short top fade.
+           ≥900px: the wash sits only behind the headline (left side) so her
+           head and face stay completely clear. */
+        .hero-bloom .hb-top    { inset: 0 0 auto 0; height: 18%; z-index: 10; background: var(--hb-top-v); }
+        @media (min-width: 900px) {
+          .hero-bloom .hb-top  {
+            height: 52%; background: var(--hb-top-h);
+            -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+                    mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+          }
+        }
+        .hero-bloom .hb-bottom { inset: auto 0 0 0; height: 24rem; z-index: 10; background: var(--hb-bottom); }
+        @media (min-width: 640px) { .hero-bloom .hb-bottom { height: 11rem; } }
+
+        .hero-bloom .hb-greet { color: var(--hb-greet); }
+        .hero-bloom .hb-title { color: var(--hb-title); text-shadow: var(--hb-title-shadow); }
+
+        .hero-bloom .hb-hint {
+          display: inline-flex; align-items: center; gap: 0.6rem;
+          padding: 0.5rem 1.05rem;
+          border-radius: 999px;
+          font-size: 0.875rem; font-weight: 500; letter-spacing: 0.01em;
+          color: var(--hb-pill-fg);
+          background: var(--hb-pill-bg);
+          border: 1px solid var(--hb-pill-ring);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+        }
+        .hero-bloom .hb-hint-dot {
+          width: 7px; height: 7px; border-radius: 999px;
+          background: var(--hb-dot);
+          box-shadow: 0 0 0 0 var(--hb-dot);
+          animation: hbPulse 2.2s ease-out infinite;
+        }
+        /* an animation (the entrance's "forwards" fill) beats a plain opacity
+           rule, so the fade-out is itself an animation on the same element */
+        .hero-bloom[data-engaged="true"] .hb-hint { animation: hbHintOut 0.8s ease forwards; }
+        @keyframes hbHintOut { from { opacity: 1; } to { opacity: 0; } }
+
+        .hero-bloom a:focus-visible {
+          outline: 2px solid var(--hb-accent);
+          outline-offset: 4px;
+          border-radius: 12px;
+        }
+
+        @keyframes hbPulse {
+          0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--hb-dot) 55%, transparent); }
+          70%  { box-shadow: 0 0 0 9px transparent; }
+          100% { box-shadow: 0 0 0 0 transparent; }
+        }
+        @keyframes heroFadeUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .hero-bloom .hero-anim {
+          opacity: 0;
+          animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .hero-bloom .hero-anim { animation: none; opacity: 1; }
+          .hero-bloom .hb-hint-dot { animation: none; }
+        }
+      `}</style>
+
+      {/* SCENE — fills the whole component edge to edge */}
+      <div className="absolute inset-0 z-0">
+        <AnimatedCharacter containerRef={heroRef} fit="cover" card={false} />
       </div>
 
-      {/* 3D CANVAS */}
-      <div className="w-full h-full absolute inset-0">
-        <Canvas className="w-full h-full">
-          <Suspense fallback={null}>
-            <PerspectiveCamera makeDefault position={[0, 0, 20]} />
+      {/* baby-pink layers: soft tint → cursor glow → top/bottom vignettes.
+          All pointer-events:none, so nothing here can block clicks. */}
+      <div className="hb-tint" aria-hidden="true" />
+      <div ref={glowRef} className="hb-glow" aria-hidden="true" />
+      <div className="hb-top" aria-hidden="true" />
+      <div className="hb-bottom" aria-hidden="true" />
 
-            <HeroCamera isMobile={isMobile}>
-              <HackerRoom
-                position={sizes.deskPosition}
-                scale={sizes.deskScale}
-                rotation={[0, -Math.PI, 0]}
-              />
-            </HeroCamera>
+      {/* HEADLINE — left-aligned. Desktop/tablet: top-left, in the headroom
+          beside her head. Phones: her face fills the frame, so the headline
+          moves down to sit just above the hint + CTA instead of on her face.
+          Padding is a clamp on the viewport (not a max-width container) so on
+          ultra-wide screens it stays at the left edge, clear of her face. */}
+      <div className="absolute inset-x-0 z-20 bottom-44 sm:bottom-auto sm:top-0 sm:pt-28">
+        <div style={{ paddingInline: "clamp(1.5rem, 5vw, 7rem)" }}>
+          <div ref={copyRef} className="flex flex-col items-start text-left gap-2 max-w-xs sm:max-w-md will-change-transform">
+            <p
+              className="hero-anim hb-greet text-lg sm:text-xl font-medium font-generalsans"
+              style={{ animationDelay: "0.1s" }}
+            >
+              Hi, I am chahd <span className="waving-hand">👋</span>
+            </p>
 
-            {/* LIGHTS — tinted to match palette */}
-            <ambientLight intensity={1} color="#f3b6ff" />
-            <directionalLight position={[10, 10, 10]} intensity={1} color="#ffb2d7" />
-            <pointLight position={[-10, 5, 5]} intensity={0.6} color="#19bdbd" />
+            <h1
+              className="hero-anim hb-title text-3xl sm:text-5xl font-bold leading-[1.1] tracking-tight"
+              style={{ animationDelay: "0.28s" }}
+            >
+              Full-Stack
+              <br />
+              Web Developer
+            </h1>
+          </div>
+        </div>
+      </div>
 
-            <group>
-              {/* LEFT */}
-              <DockerLogo
-                position={[-12, 5, 0]}
-                scale={0.6}
-                rotation={[0, -25, 0]}
-              />
+      {/* HINT + CTA — one centred stack at the bottom edge */}
+      <div className="absolute inset-x-0 bottom-8 sm:bottom-12 z-20 flex flex-col items-center gap-4 px-6">
+        {!reduceMotion && (
+          <p className="hero-anim hb-hint pointer-events-none whitespace-nowrap" style={{ animationDelay: "0.65s" }}>
+            <span className="hb-hint-dot" aria-hidden="true" />
+            {isTouch ? "Drag across the scene — go on." : "Move your cursor around — go on."}
+          </p>
+        )}
 
-              {/* RIGHT */}
-              <ReactLogo position={[10, 3, 0]} scale={0.3} />
-
-              <WebDevModel position={[-5, -6, 0]} scale={0.3} />
-            </group>
-          </Suspense>
-        </Canvas>
-
-     {/* CTA BUTTON */}
-<div className="absolute bottom-[-10] left-1/2 -translate-x-1/2 z-10 c-space">
-  <a href="#about" className="w-fit">
-    <Button
-      name="Let's work together"
-      isBeam
-      containerClass="sm:w-fit w-full sm:min-w-96"
-    />
-  </a>
-</div>
+        <a href="#about" className="w-fit hero-anim" style={{ animationDelay: "0.5s" }}>
+          <Button
+            name="Let's work together"
+            isBeam
+            containerClass="sm:w-fit w-full sm:min-w-96"
+          />
+        </a>
       </div>
     </section>
   );
