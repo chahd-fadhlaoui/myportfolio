@@ -4,7 +4,6 @@ import About from './sections/About';
 import Projects from './sections/Projects';
 import Contact from './sections/Contact';
 import Footer from './sections/Footer';
-import Experience from './sections/Experience';
 import StarField from './components/Starfield';
 
 const App = () => {
@@ -21,7 +20,6 @@ const App = () => {
       <div className="max-w-7xl mx-auto">
         <About />
         <Projects />
-        <Experience />
         <Contact />
         <Footer />
       </div>

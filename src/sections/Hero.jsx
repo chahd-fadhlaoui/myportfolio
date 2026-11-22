@@ -1,30 +1,19 @@
+
 import { useEffect, useRef, useState } from "react";
 import AnimatedCharacter from "../components/AnimatedCharacter";
 import Button from "../components/Button";
 
-/**
- * Hero — full-bleed animated scene + baby-pink cursor glow.
- *
- * Layout is unchanged from the previous version: scene fills the section,
- * headline top-left in the headroom above her head, CTA at the bottom.
- * What this adds:
- *   - baby-pink tokens, scoped to `.hero-bloom`, with a dedicated light and
- *     dark treatment (dark = default, matching your `:root / html.dark`
- *     convention; `html.light` = the soft baby-pink look)
- *   - a pink glow that follows the pointer (rAF + CSS variables, no React
- *     re-renders) and gently drifts on its own when the pointer is idle,
- *     on touch screens, or after the pointer leaves
- *   - the "Move your cursor around — go on." hint
- */
 function Hero() {
   const heroRef = useRef(null);
   const glowRef = useRef(null);
   const copyRef = useRef(null);
 
-  // touch / no-hover devices get touch-appropriate copy
   const [isTouch] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(hover: none)").matches
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: none)").matches
   );
+
   const [reduceMotion] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -35,9 +24,9 @@ function Hero() {
     const hero = heroRef.current;
     const glow = glowRef.current;
     const copy = copyRef.current;
+
     if (!hero || !glow) return;
 
-    // reduced motion: park the glow, no tracking, no parallax, no drift
     if (reduceMotion) {
       glow.style.setProperty("--gx", "68%");
       glow.style.setProperty("--gy", "30%");
@@ -45,8 +34,9 @@ function Hero() {
     }
 
     const clamp = (v) => Math.max(0, Math.min(1, v));
-    let tx = 0.68, ty = 0.3; // target (0..1)
-    let cx = tx, cy = ty;    // eased current
+
+    let tx = 0.68, ty = 0.3;
+    let cx = tx, cy = ty;
     let lastInput = -Infinity;
     let raf = 0;
     let running = false;
@@ -57,41 +47,44 @@ function Hero() {
       tx = clamp((clientX - r.left) / r.width);
       ty = clamp((clientY - r.top) / r.height);
       lastInput = performance.now();
+
       if (!hero.dataset.engaged && !engagedTimer) {
-        // hint has done its job — fade it a moment after first interaction
         engagedTimer = window.setTimeout(() => {
           hero.dataset.engaged = "true";
         }, 2200);
       }
     };
 
-    const onPointerMove = (e) => setTarget(e.clientX, e.clientY);
+    const onPointerMove = (e) =>
+      setTarget(e.clientX, e.clientY);
+
     const onTouch = (e) => {
       const t = e.touches && e.touches[0];
       if (t) setTarget(t.clientX, t.clientY);
     };
+
     const onLeave = () => {
-      lastInput = -Infinity; // hand control back to the idle drift
+      lastInput = -Infinity;
     };
 
     const tick = (t) => {
-      // idle: after 2.5s with no input the glow wanders slowly on its own
       if (t - lastInput > 2500) {
         tx = 0.5 + 0.3 * Math.cos(t / 4200);
         ty = 0.42 + 0.2 * Math.sin(t / 5300);
       }
+
       cx += (tx - cx) * 0.08;
       cy += (ty - cy) * 0.08;
+
       glow.style.setProperty("--gx", (cx * 100).toFixed(2) + "%");
       glow.style.setProperty("--gy", (cy * 100).toFixed(2) + "%");
+
       if (copy) {
-        // very small parallax on the headline block (px, not %, so it can
-        // never push text toward the screen edge)
-        copy.style.transform = `translate3d(${((0.5 - cx) * 14).toFixed(2)}px, ${(
-          (0.5 - cy) *
-          8
-        ).toFixed(2)}px, 0)`;
+        copy.style.transform = `translate3d(${
+          ((0.5 - cx) * 14).toFixed(2)
+        }px, ${((0.5 - cy) * 8).toFixed(2)}px, 0)`;
       }
+
       raf = requestAnimationFrame(tick);
     };
 
@@ -100,13 +93,14 @@ function Hero() {
       running = true;
       raf = requestAnimationFrame(tick);
     };
+
     const stop = () => {
       running = false;
       cancelAnimationFrame(raf);
     };
 
-    // only animate while the hero is on screen and the tab is visible
     let inView = true;
+
     const io = new IntersectionObserver(
       ([entry]) => {
         inView = entry.isIntersecting;
@@ -114,14 +108,24 @@ function Hero() {
       },
       { threshold: 0 }
     );
+
     io.observe(hero);
-    const onVis = () => (document.hidden || !inView ? stop() : start());
+
+    const onVis = () =>
+      document.hidden || !inView ? stop() : start();
+
     document.addEventListener("visibilitychange", onVis);
 
-    hero.addEventListener("pointermove", onPointerMove, { passive: true });
+    hero.addEventListener("pointermove", onPointerMove, {
+      passive: true,
+    });
     hero.addEventListener("pointerleave", onLeave);
-    hero.addEventListener("touchstart", onTouch, { passive: true });
-    hero.addEventListener("touchmove", onTouch, { passive: true });
+    hero.addEventListener("touchstart", onTouch, {
+      passive: true,
+    });
+    hero.addEventListener("touchmove", onTouch, {
+      passive: true,
+    });
     hero.addEventListener("touchend", onLeave);
 
     return () => {
@@ -145,9 +149,6 @@ function Hero() {
       className="hero-bloom min-h-screen w-full relative overflow-hidden"
     >
       <style>{`
-        /* ── Hero tokens ───────────────────────────────────────────────
-           Default = dark (your :root / html.dark convention).
-           html.light = baby-pink look. Scoped to the hero only. */
         .hero-bloom {
           --hb-bg: #241f2e;
           --hb-tint: linear-gradient(180deg, rgba(244,166,195,0.06), rgba(244,166,195,0.02));
@@ -167,6 +168,7 @@ function Hero() {
           --hb-accent: #ffb6d5;
           background: var(--hb-bg);
         }
+
         html.light .hero-bloom {
           --hb-bg: #ffe9f1;
           --hb-tint: linear-gradient(180deg, rgba(255,214,231,0.16), rgba(255,233,241,0.08));
@@ -189,53 +191,137 @@ function Hero() {
         .hero-bloom .hb-tint,
         .hero-bloom .hb-top,
         .hero-bloom .hb-bottom,
-        .hero-bloom .hb-glow { position: absolute; pointer-events: none; }
-        .hero-bloom .hb-tint   { inset: 0; z-index: 5;  background: var(--hb-tint); }
-        .hero-bloom .hb-glow   {
-          inset: 0; z-index: 6;
+        .hero-bloom .hb-glow {
+          position: absolute;
+          pointer-events: none;
+        }
+
+        .hero-bloom .hb-tint {
+          inset: 0;
+          z-index: 5;
+          background: var(--hb-tint);
+        }
+
+        .hero-bloom .hb-glow {
+          inset: 0;
+          z-index: 6;
           background: radial-gradient(
             clamp(320px, 42vw, 760px) circle at var(--gx, 68%) var(--gy, 30%),
-            var(--hb-glow-core) 0%, var(--hb-glow-mid) 42%, transparent 72%);
+            var(--hb-glow-core) 0%,
+            var(--hb-glow-mid) 42%,
+            transparent 72%
+          );
           mix-blend-mode: var(--hb-glow-blend);
         }
-        /* phones: headline spans the width, so the wash is a short top fade.
-           ≥900px: the wash sits only behind the headline (left side) so her
-           head and face stay completely clear. */
-        .hero-bloom .hb-top    { inset: 0 0 auto 0; height: 18%; z-index: 10; background: var(--hb-top-v); }
+
+        .hero-bloom .hb-top {
+          inset: 0 0 auto 0;
+          height: 18%;
+          z-index: 10;
+          background: var(--hb-top-v);
+        }
+
         @media (min-width: 900px) {
-          .hero-bloom .hb-top  {
-            height: 52%; background: var(--hb-top-h);
+          .hero-bloom .hb-top {
+            height: 52%;
+            background: var(--hb-top-h);
             -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
-                    mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
           }
         }
-        .hero-bloom .hb-bottom { inset: auto 0 0 0; height: 24rem; z-index: 10; background: var(--hb-bottom); }
-        @media (min-width: 640px) { .hero-bloom .hb-bottom { height: 11rem; } }
 
-        .hero-bloom .hb-greet { color: var(--hb-greet); }
-        .hero-bloom .hb-title { color: var(--hb-title); text-shadow: var(--hb-title-shadow); }
+        .hero-bloom .hb-bottom {
+          inset: auto 0 0 0;
+          height: 24rem;
+          z-index: 10;
+          background: var(--hb-bottom);
+        }
+
+        @media (min-width: 640px) {
+          .hero-bloom .hb-bottom {
+            height: 11rem;
+          }
+        }
+
+        .hero-bloom .hb-greet {
+          color: #ffc9de;
+          font-size: 50px;
+          font-weight: 700;
+        }
+
+        .hero-bloom .hb-title {
+          color: #ffffff;
+          text-shadow: 0 3px 18px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-bloom .hb-subtitle {
+          color: #ffb6d5;
+          font-size: 20px;
+          font-weight: 600;
+        }
+
+        .hero-bloom .hb-description {
+          color: #f4eaf0;
+          font-size: clamp(26px, 3vw, 26px);
+          font-weight: 500;
+          line-height: 1.4;
+          max-width: 46rem;
+          text-shadow: 0 1px 8px rgba(0,0,0,0.12);
+        }
+
+        html.light .hero-bloom .hb-title {
+          color: #ff4bae;
+          text-shadow: none;
+        }
+
+        html.light .hero-bloom .hb-subtitle {
+          color: #ff2e8c;
+        }
+
+        html.light .hero-bloom .hb-description {
+          color: #ffffff;
+          text-shadow: none;
+        }
+
+        html.light .hero-bloom .hb-greet {
+          color: #fe76b8;
+          font-size: 50px;
+          font-weight: 700;
+        }
 
         .hero-bloom .hb-hint {
-          display: inline-flex; align-items: center; gap: 0.6rem;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.6rem;
           padding: 0.5rem 1.05rem;
           border-radius: 999px;
-          font-size: 0.875rem; font-weight: 500; letter-spacing: 0.01em;
+          font-size: 0.875rem;
+          font-weight: 500;
+          letter-spacing: 0.01em;
           color: var(--hb-pill-fg);
           background: var(--hb-pill-bg);
           border: 1px solid var(--hb-pill-ring);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
         }
+
         .hero-bloom .hb-hint-dot {
-          width: 7px; height: 7px; border-radius: 999px;
+          width: 7px;
+          height: 7px;
+          border-radius: 999px;
           background: var(--hb-dot);
           box-shadow: 0 0 0 0 var(--hb-dot);
           animation: hbPulse 2.2s ease-out infinite;
         }
-        /* an animation (the entrance's "forwards" fill) beats a plain opacity
-           rule, so the fade-out is itself an animation on the same element */
-        .hero-bloom[data-engaged="true"] .hb-hint { animation: hbHintOut 0.8s ease forwards; }
-        @keyframes hbHintOut { from { opacity: 1; } to { opacity: 0; } }
+
+        .hero-bloom[data-engaged="true"] .hb-hint {
+          animation: hbHintOut 0.8s ease forwards;
+        }
+
+        @keyframes hbHintOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
+        }
 
         .hero-bloom a:focus-visible {
           outline: 2px solid var(--hb-accent);
@@ -244,75 +330,115 @@ function Hero() {
         }
 
         @keyframes hbPulse {
-          0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--hb-dot) 55%, transparent); }
-          70%  { box-shadow: 0 0 0 9px transparent; }
+          0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--hb-dot) 55%, transparent); }
+          70% { box-shadow: 0 0 0 9px transparent; }
           100% { box-shadow: 0 0 0 0 transparent; }
         }
+
         @keyframes heroFadeUp {
-          from { opacity: 0; transform: translateY(18px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
+
         .hero-bloom .hero-anim {
           opacity: 0;
           animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+
         @media (prefers-reduced-motion: reduce) {
-          .hero-bloom .hero-anim { animation: none; opacity: 1; }
-          .hero-bloom .hb-hint-dot { animation: none; }
+          .hero-bloom .hero-anim {
+            animation: none;
+            opacity: 1;
+          }
+          .hero-bloom .hb-hint-dot {
+            animation: none;
+          }
         }
       `}</style>
 
-      {/* SCENE — fills the whole component edge to edge */}
+      {/* Animated background */}
       <div className="absolute inset-0 z-0">
         <AnimatedCharacter containerRef={heroRef} fit="cover" card={false} />
       </div>
 
-      {/* baby-pink layers: soft tint → cursor glow → top/bottom vignettes.
-          All pointer-events:none, so nothing here can block clicks. */}
+      {/* Pink visual effects */}
       <div className="hb-tint" aria-hidden="true" />
       <div ref={glowRef} className="hb-glow" aria-hidden="true" />
       <div className="hb-top" aria-hidden="true" />
       <div className="hb-bottom" aria-hidden="true" />
 
-      {/* HEADLINE — left-aligned. Desktop/tablet: top-left, in the headroom
-          beside her head. Phones: her face fills the frame, so the headline
-          moves down to sit just above the hint + CTA instead of on her face.
-          Padding is a clamp on the viewport (not a max-width container) so on
-          ultra-wide screens it stays at the left edge, clear of her face. */}
+      {/* Hero introduction */}
       <div className="absolute inset-x-0 z-20 bottom-44 sm:bottom-auto sm:top-0 sm:pt-28">
         <div style={{ paddingInline: "clamp(1.5rem, 5vw, 7rem)" }}>
-          <div ref={copyRef} className="flex flex-col items-start text-left gap-2 max-w-xs sm:max-w-md will-change-transform">
+          <div
+            ref={copyRef}
+            className="ml-auto flex flex-col items-start text-left gap-4
+                       max-w-xs sm:max-w-2xl will-change-transform"
+          >
             <p
-              className="hero-anim hb-greet text-lg sm:text-xl font-medium font-generalsans"
+              className="hero-anim hb-greet text-lg sm:text-[22px]
+                         font-medium font-generalsans"
               style={{ animationDelay: "0.1s" }}
             >
-              Hi, I am chahd <span className="waving-hand">👋</span>
+              Hi, I'm Chahd Fadhlaoui <span className="waving-hand">👋</span>
             </p>
 
             <h1
-              className="hero-anim hb-title text-3xl sm:text-5xl font-bold leading-[1.1] tracking-tight"
+              className="hero-anim hb-title text-2xl sm:text-4xl
+                         font-bold leading-[1.08] tracking-tight
+                         font-generalsans"
               style={{ animationDelay: "0.28s" }}
             >
-              Full-Stack
+              Software Engineering
               <br />
-              Web Developer
+              Student
             </h1>
+
+            <p
+              className="hero-anim hb-subtitle text-[13px] sm:text-[20px]
+                         font-semibold tracking-[0.08em]"
+              style={{ animationDelay: "0.38s" }}
+            >
+              FULL-STACK DEVELOPMENT <span>·</span> DEVOPS <span>·</span> SRE
+            </p>
+
+            <p
+              className="hero-anim hb-description font-normal"
+              style={{ animationDelay: "0.48s" }}
+            >
+             I build web and mobile applications and am expanding my expertise in DevOps and Site Reliability Engineering through hands-on projects.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* HINT + CTA — one centred stack at the bottom edge */}
+      {/* Interaction hint and CTA */}
       <div className="absolute inset-x-0 bottom-8 sm:bottom-12 z-20 flex flex-col items-center gap-4 px-6">
         {!reduceMotion && (
-          <p className="hero-anim hb-hint pointer-events-none whitespace-nowrap" style={{ animationDelay: "0.65s" }}>
+          <p
+            className="hero-anim hb-hint pointer-events-none whitespace-nowrap"
+            style={{ animationDelay: "0.65s" }}
+          >
             <span className="hb-hint-dot" aria-hidden="true" />
-            {isTouch ? "Drag across the scene — go on." : "Move your cursor around — go on."}
+            {isTouch
+              ? "Drag across the scene — go on."
+              : "Move your cursor around — go on."}
           </p>
         )}
 
-        <a href="#about" className="w-fit hero-anim" style={{ animationDelay: "0.5s" }}>
+        <a
+          href="#work"
+          className="w-fit hero-anim"
+          style={{ animationDelay: "0.5s" }}
+        >
           <Button
-            name="Let's work together"
+            name="Explore My Work"
             isBeam
             containerClass="sm:w-fit w-full sm:min-w-96"
           />
