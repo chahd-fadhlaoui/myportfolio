@@ -1,8 +1,7 @@
 import { navLinks } from "../constants/index.js";
 
 /* Update these with your real links */
-const CTA_HREF = "#contact";
-const CTA_LABEL = "Let's talk";
+
 const GITHUB_URL = "https://github.com/";
 const LINKEDIN_URL = "https://www.linkedin.com/";
 const TERMS_HREF = "/terms";
@@ -250,9 +249,10 @@ const Footer = () => {
 
         .nf-num {
           font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-          font-size: 0.65rem;
+          font-size: 0.85rem;
+          font-weight: 600;
           color: var(--nf-accent);
-          opacity: 0.7;
+          opacity: 0.85;
         }
 
         .nf-socials {
@@ -353,10 +353,7 @@ const Footer = () => {
             </h2>
           </div>
 
-          <a href={CTA_HREF} className="nf-cta">
-            {CTA_LABEL}
-            <Arrow />
-          </a>
+   
         </div>
 
         {/* MIDDLE */}

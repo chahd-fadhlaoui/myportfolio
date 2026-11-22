@@ -378,15 +378,15 @@ function Hero() {
         <div style={{ paddingInline: "clamp(1.5rem, 5vw, 7rem)" }}>
           <div
             ref={copyRef}
-            className="ml-auto flex flex-col items-start text-left gap-4
-                       max-w-xs sm:max-w-2xl will-change-transform"
+            className="mr-auto flex flex-col items-start text-left gap-4
+           max-w-xs sm:max-w-2xl will-change-transform"
           >
             <p
               className="hero-anim hb-greet text-lg sm:text-[22px]
                          font-medium font-generalsans"
               style={{ animationDelay: "0.1s" }}
             >
-              Hi, I'm Chahd Fadhlaoui <span className="waving-hand">👋</span>
+              Hi, I'm Chahd Fadhlaoui 
             </p>
 
             <h1
@@ -437,11 +437,7 @@ function Hero() {
           className="w-fit hero-anim"
           style={{ animationDelay: "0.5s" }}
         >
-          <Button
-            name="Explore My Work"
-            isBeam
-            containerClass="sm:w-fit w-full sm:min-w-96"
-          />
+ 
         </a>
       </div>
     </section>

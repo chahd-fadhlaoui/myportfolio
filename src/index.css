@@ -872,13 +872,52 @@ html.light .text-gray-gradient { background: none; -webkit-text-fill-color: curr
 }
 
 /* ════════════════════════════════════════════════════
-   SCROLLBAR
+   SCROLLBAR — hero / navbar / footer pinks
    ════════════════════════════════════════════════════ */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
+:root,
+html.dark {
+  --sb-thumb: #ffb6d5;                     /* dark accent pink  */
+  --sb-thumb-hover: #ffd9e8;
+  --sb-track: rgba(255, 182, 213, 0.10);
+}
+
+html.light {
+  --sb-thumb: #c9487f;                     /* light accent pink */
+  --sb-thumb-hover: #8f1d54;
+  --sb-track: rgba(201, 72, 127, 0.12);
+}
+
+::-webkit-scrollbar { width: 10px; }
+
+::-webkit-scrollbar-track { background: var(--sb-track); }
+
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(var(--pink), var(--teal));
-  border-radius: 3px;
+  background: var(--sb-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sb-thumb-hover);
+  background-clip: padding-box;
+}
+
+/* Firefox */
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sb-thumb) var(--sb-track);
+  }
+}
+
+/* Firefox only. Chrome ignores the ::-webkit rules above if it sees
+   scrollbar-color, so this is gated to browsers without ::-webkit-scrollbar. */
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-a) var(--copy-bg);
+  }
 }
 
 /* ════════════════════════════════════════════════════

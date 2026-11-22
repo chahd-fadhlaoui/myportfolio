@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Globe from "react-globe.gl";
 import Button from "../components/Button";
@@ -12,13 +11,13 @@ const STYLES = `
 .ed-root {
   --ed-paper: #f5f0e6;
   --ed-ink: #141414;
-  --ed-pink: #ff4fa3;
+  --ed-pink: #ff90c6;
   --ed-yellow: #ffe45c;
   --ed-mint: #a7efd3;
   --ed-lilac: #cfc2ff;
-  --ed-blush: #ffc2de;
   --ed-line: 2.5px;
   --ed-pad: clamp(1rem, 3vw, 2.25rem);
+  --ed-media-h: clamp(280px, 30vw, 400px);
   --ed-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --ed-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -33,6 +32,7 @@ const STYLES = `
 .ed-shell {
   position: relative;
   overflow: hidden;
+  overflow: clip; /* clip, not hidden, so the sticky column can stick */
   padding: var(--ed-pad);
   border: var(--ed-line) solid var(--ed-ink);
   border-radius: 36px;
@@ -81,7 +81,7 @@ const STYLES = `
 /* Layout */
 .ed-layout {
   display: grid;
-  gap: 1.75rem;
+  gap: 2rem;
 }
 @media (min-width: 1280px) {
   .ed-layout {
@@ -90,28 +90,49 @@ const STYLES = `
     align-items: start;
   }
 }
+
+/* Left column: identity + nav + contact */
 .ed-aside {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  gap: 1.75rem;
 }
-@media (min-width: 1280px) and (min-height: 860px) {
+/* tablet: identity and contact sit side by side */
+@media (min-width: 700px) and (max-width: 1279px) {
+  .ed-aside {
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    gap: 2rem;
+  }
+  .ed-aside .ed-contact {
+    align-content: center;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+@media (min-width: 1280px) {
+  .ed-aside { gap: 2rem; }
+}
+@media (min-width: 1280px) and (min-height: 760px) {
   .ed-aside {
     position: sticky;
     top: 1.5rem;
   }
 }
+
+/* Right column */
 .ed-main {
   display: grid;
-  gap: 3rem;
+  gap: 3.5rem;
   min-width: 0;
+  container-type: inline-size;
+  container-name: ed-main;
 }
 
 /* Open rows: no outer boxes, only the media is framed */
 .ed-card {
   position: relative;
   display: grid;
-  gap: 1.5rem;
+  gap: 1.75rem;
 }
 .ed-block[data-tone="yellow"] { --tone: var(--ed-yellow); }
 .ed-block[data-tone="mint"] { --tone: var(--ed-mint); }
@@ -132,7 +153,7 @@ const STYLES = `
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  margin-bottom: 1.1rem;
+  margin-bottom: 1.4rem;
 }
 .ed-num {
   font-size: clamp(2rem, 4vw, 2.8rem);
@@ -167,19 +188,42 @@ const STYLES = `
 .ed-h3--sm {
   font-size: clamp(1.7rem, 2.5vw, 2.1rem);
 }
-.ed-p--lead {
-  max-width: 62ch;
-  font-size: clamp(1.3rem, 1.8vw, 1.55rem);
-  line-height: 1.7;
-}
-.ed-p--body {
-  max-width: 62ch;
-}
 .ed-p {
+  max-width: 62ch;
   margin-top: 1rem;
   font-size: 1.2rem;
   line-height: 1.8;
   opacity: 0.86;
+}
+.ed-p--lead {
+  font-size: clamp(1.3rem, 1.8vw, 1.55rem);
+  line-height: 1.7;
+  opacity: 1;
+}
+
+/* 01 Hello: lead on the left, details on the right when there is room */
+.ed-hello { display: grid; }
+.ed-hello-more .ed-p:first-child { margin-top: 1rem; }
+@container ed-main (min-width: 900px) {
+  .ed-hello {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "title more"
+      "lead  more"
+      "chips more";
+    column-gap: 3rem;
+    align-items: start;
+  }
+  .ed-hello-title { grid-area: title; }
+  .ed-hello-lead { grid-area: lead; }
+  .ed-hello-chips { grid-area: chips; }
+  .ed-hello-more {
+    grid-area: more;
+    padding-left: 2.5rem;
+    border-left: var(--ed-line) solid var(--ed-ink);
+  }
+  .ed-hello-more .ed-p:first-child { margin-top: 0; }
 }
 
 /* Chips */
@@ -187,7 +231,7 @@ const STYLES = `
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
-  margin: 1.4rem 0 0;
+  margin: 1.6rem 0 0;
   padding: 0;
   list-style: none;
 }
@@ -205,25 +249,32 @@ const STYLES = `
   transform: rotate(-3deg) translateY(-2px);
 }
 
-/* Split layout: media + text */
-.ed-split { grid-template-columns: 1fr; }
-@media (min-width: 700px) {
+/* Split rows: media + text. Stacked until the column is wide enough. */
+.ed-split { grid-template-columns: minmax(0, 1fr); }
+@container ed-main (min-width: 720px) {
   .ed-split {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
-    gap: 2rem;
+    gap: 2.75rem;
   }
+}
+.ed-split .ed-p { margin-top: 0.9rem; }
+
+/* Both framed media share one height so the rows line up */
+.ed-panel,
+.ed-globe-stage {
+  min-height: var(--ed-media-h);
+  border: var(--ed-line) solid var(--ed-ink);
+  border-radius: 22px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .ed-panel {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.1rem;
-  border: var(--ed-line) solid var(--ed-ink);
-  border-radius: 22px;
+  padding: 1.5rem;
   background: var(--tone, #fff);
   box-shadow: 6px 6px 0 var(--ed-ink);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 @media (hover: hover) {
   .ed-card:hover .ed-panel {
@@ -234,7 +285,7 @@ const STYLES = `
 .ed-icons {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem 1rem;
+  gap: 2rem 1rem;
   width: 100%;
   margin: 0;
   padding: 0.5rem;
@@ -244,13 +295,13 @@ const STYLES = `
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.65rem;
   font-family: var(--ed-mono);
   font-size: 0.95rem;
   text-align: center;
 }
 .ed-icon img {
-  width: clamp(38px, 5vw, 52px);
+  width: clamp(44px, 5vw, 64px);
   height: auto;
   aspect-ratio: 1;
   transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -261,13 +312,11 @@ const STYLES = `
 .ed-globe-stage {
   position: relative;
   display: flex;
+  align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: var(--ed-line) solid var(--ed-ink);
-  border-radius: 22px;
   background: radial-gradient(circle at 50% 45%, rgba(255, 79, 163, 0.35), transparent 68%), #0b0b0b;
   box-shadow: 6px 6px 0 var(--ed-pink);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 @media (hover: hover) {
   .ed-card:hover .ed-globe-stage {
@@ -276,8 +325,7 @@ const STYLES = `
   }
 }
 .ed-globe {
-  width: 100%;
-  max-width: 460px;
+  width: min(100%, calc(var(--ed-media-h) - var(--ed-line) * 2));
   aspect-ratio: 1 / 1;
   cursor: grab;
 }
@@ -285,7 +333,7 @@ const STYLES = `
 .ed-pin {
   position: absolute;
   left: 50%;
-  bottom: 0.8rem;
+  bottom: 0.9rem;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -300,33 +348,51 @@ const STYLES = `
   white-space: nowrap;
 }
 
-/* Profile (aside) */
+/* Identity card (replaces the portrait) */
 .ed-profile {
   display: grid;
-  gap: 1.1rem;
+  gap: 1.5rem;
+  align-content: start;
 }
-.ed-photo {
+.ed-id {
   position: relative;
-  display: flex;
-  justify-content: center;
-  padding-top: 1.4rem;
+  display: grid;
+  align-content: end;
+  gap: 0.8rem;
+  min-height: 260px;
+  padding: 1.6rem;
   overflow: hidden;
   border: var(--ed-line) solid var(--ed-ink);
   border-radius: 22px;
   background: var(--ed-pink);
   box-shadow: 6px 6px 0 var(--ed-ink);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.ed-photo img {
-  width: 100%;
-  max-width: 270px;
-  max-height: 280px;
-  object-fit: contain;
+@media (hover: hover) {
+  .ed-id:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0 var(--ed-ink);
+  }
+}
+.ed-monogram {
+  position: absolute;
+  top: -1.6rem;
+  right: 1rem;
+  color: transparent;
+  font-size: 11rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  -webkit-text-stroke: var(--ed-line) var(--ed-ink);
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
 }
 .ed-sticker {
   position: absolute;
-  top: 0.7rem;
-  left: 0.7rem;
-  padding: 0.2rem 0.65rem;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.2rem 0.7rem;
   border: var(--ed-line) solid var(--ed-ink);
   border-radius: 999px;
   background: var(--ed-yellow);
@@ -336,21 +402,24 @@ const STYLES = `
   transform: rotate(-6deg);
 }
 .ed-name {
-  font-size: 2.2rem;
+  position: relative;
+  font-size: clamp(2.8rem, 4vw, 3.6rem);
   font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.04em;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
 }
 .ed-role {
-  margin-top: 0.4rem;
+  position: relative;
   font-family: var(--ed-mono);
   font-size: 0.95rem;
 }
 .ed-status {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  align-self: flex-start;
+  justify-self: start;
+  margin-top: 0.2rem;
   padding: 0.35rem 0.85rem;
   border: var(--ed-line) solid var(--ed-ink);
   border-radius: 999px;
@@ -383,9 +452,8 @@ const STYLES = `
 .ed-nav {
   display: none;
   margin: 0;
-  padding: 0.9rem 0 0;
+  padding: 0;
   list-style: none;
-  border-top: var(--ed-line) solid var(--ed-ink);
 }
 @media (min-width: 1280px) {
   .ed-nav { display: grid; gap: 0.3rem; }
@@ -394,7 +462,7 @@ const STYLES = `
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0.4rem 0.65rem;
+  padding: 0.45rem 0.75rem;
   border: var(--ed-line) solid transparent;
   border-radius: 12px;
   color: inherit;
@@ -417,7 +485,7 @@ const STYLES = `
 .ed-contact {
   display: grid;
   gap: 0.2rem;
-  padding-top: 1.5rem;
+  padding-top: 1.75rem;
   border-top: var(--ed-line) solid var(--ed-ink);
 }
 .ed-kicker {
@@ -469,6 +537,7 @@ const STYLES = `
 }
 .ed-mail {
   align-self: flex-start;
+  justify-self: start;
   margin-top: 0.9rem;
   color: inherit;
   font-size: 0.95rem;
@@ -482,7 +551,7 @@ const STYLES = `
 /* Ticker */
 .ed-marquee {
   display: flex;
-  margin: 2.5rem calc(var(--ed-pad) * -1) calc(var(--ed-pad) * -1);
+  margin: 3rem calc(var(--ed-pad) * -1) calc(var(--ed-pad) * -1);
   overflow: hidden;
   border-top: var(--ed-line) solid var(--ed-ink);
   background: var(--ed-ink);
@@ -521,7 +590,8 @@ const STYLES = `
   outline-offset: 3px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .ed-block, .ed-card, .ed-chip, .ed-icon img, .ed-copy { transition: none; }
+  .ed-block, .ed-card, .ed-chip, .ed-icon img, .ed-copy, .ed-id,
+  .ed-panel, .ed-globe-stage { transition: none; }
   .ed-block { opacity: 1; transform: none; }
   .ed-track, .ed-dot::after { animation: none; }
 }
@@ -681,7 +751,7 @@ const LocationGlobe = () => {
         onGlobeReady={handleReady}
         backgroundColor="rgba(0,0,0,0)"
         showAtmosphere
-        atmosphereColor="#fe2aa2"
+        atmosphereColor="#f7bfde"
         atmosphereAltitude={0.18}
         showGraticules
         globeImageUrl="https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg"
@@ -761,23 +831,21 @@ const About = () => {
         </header>
 
         <div className="ed-layout">
-          {/* ---------- Sticky profile ---------- */}
+          {/* ---------- Sticky identity column ---------- */}
           <aside className="ed-aside">
             <div className="ed-profile">
-              <div className="ed-photo">
-                <img src="assets/me3.png" alt="Portrait of Chahd" />
+              <div className="ed-id">
+                <span className="ed-monogram" aria-hidden="true">
+                  C
+                </span>
                 <span className="ed-sticker">SWE student</span>
-              </div>
-
-              <div>
                 <h3 className="ed-name">Chahd</h3>
                 <p className="ed-role">DevOps · SRE · Web & Mobile</p>
+                <span className="ed-status">
+                  <span className="ed-dot" aria-hidden="true" />
+                  Open to remote work
+                </span>
               </div>
-
-              <span className="ed-status">
-                <span className="ed-dot" aria-hidden="true" />
-                Open to remote work
-              </span>
 
               <ul className="ed-nav" aria-label="Jump to section">
                 {SECTIONS.map(({ id, n, label }) => (
@@ -796,7 +864,6 @@ const About = () => {
             </div>
 
             <div className="ed-contact">
-              <p className="ed-kicker">Contact me</p>
 
               <button
                 type="button"
@@ -820,33 +887,33 @@ const About = () => {
           {/* ---------- Numbered sections ---------- */}
           <div className="ed-main">
             <Block id="ed-hello" n="01" label="Hello" tone="yellow">
-              <div className="ed-card">
-                <div>
-                  <h3 className="ed-h3">Hi, I'm Chahd</h3>
-                  <p className="ed-p ed-p--lead">
-                    I'm a Software Engineering student specializing in DevOps
-                    and Site Reliability Engineering, with a background in web
-                    and mobile application development.
-                  </p>
-                  <p className="ed-p ed-p--body">
+              <div className="ed-hello">
+                <h3 className="ed-h3 ed-hello-title">Hi, I'm Chahd</h3>
+                <p className="ed-p ed-p--lead ed-hello-lead">
+                  I'm a Software Engineering student specializing in DevOps and
+                  Site Reliability Engineering, with a background in web and
+                  mobile application development.
+                </p>
+                <div className="ed-hello-more">
+                  <p className="ed-p">
                     I have hands-on experience building frontend and backend
                     applications, integrating REST APIs, and working with modern
                     technologies such as React, Node.js, and MongoDB.
                   </p>
-                  <p className="ed-p ed-p--body">
+                  <p className="ed-p">
                     Currently, I'm strengthening my infrastructure and
                     automation skills through practical projects involving
                     Docker, Kubernetes, CI/CD pipelines, deployment automation,
                     and software reliability.
                   </p>
-                  <ul className="ed-chips" aria-label="Focus areas">
-                    {FOCUS.map((item) => (
-                      <li key={item} className="ed-chip">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
                 </div>
+                <ul className="ed-chips ed-hello-chips" aria-label="Focus areas">
+                  {FOCUS.map((item) => (
+                    <li key={item} className="ed-chip">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </Block>
 
@@ -859,8 +926,8 @@ const About = () => {
                         <img
                           src={`${ICON_BASE}/${slug}/${slug}-original.svg`}
                           alt=""
-                          width="52"
-                          height="52"
+                          width="64"
+                          height="64"
                           loading="lazy"
                         />
                         <span>{name}</span>
@@ -896,11 +963,7 @@ const About = () => {
                     I&apos;m based in Tunisia, and open to remote work
                     worldwide.
                   </p>
-                  <Button
-                    name="Contact Me"
-                    isBeam
-                    containerClass="w-full mt-8"
-                  />
+                 
                 </div>
               </div>
             </Block>

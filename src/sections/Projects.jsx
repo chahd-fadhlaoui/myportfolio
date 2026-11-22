@@ -780,9 +780,7 @@ const Projects = () => {
           </div>
         </div>
 
-        <p className="pj-hint" aria-hidden="true">
-          ← → keys or swipe to browse
-        </p>
+    
 
         <p className="pj-sr" aria-live="polite">
           {`Project ${index + 1} of ${total}: ${project.title}`}

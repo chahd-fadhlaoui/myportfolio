@@ -292,10 +292,11 @@ const Navbar = () => {
 
         .nb-num {
           font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-          font-size: 0.65rem;
-          letter-spacing: 0.05em;
+          font-size: 0.85rem;
+          font-weight: 600;
+          letter-spacing: 0.04em;
           color: var(--nb-accent);
-          opacity: 0.55;
+          opacity: 0.8;
           transition: opacity 0.25s ease;
         }
 
@@ -492,7 +493,7 @@ const Navbar = () => {
         }
 
         .nb-ov-link .nb-num {
-          font-size: 0.8rem;
+          font-size: 1.1rem;
           opacity: 1;
         }
 
