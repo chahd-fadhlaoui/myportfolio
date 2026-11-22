@@ -269,6 +269,13 @@ function Hero() {
           text-shadow: 0 1px 8px rgba(0,0,0,0.12);
         }
 
+        /* Pink underline highlight, matching the About section */
+        .hero-bloom .hb-description .hb-em {
+          font-weight: 600;
+          background: linear-gradient(transparent 62%, #ff35a4 62%);
+          padding: 0 0.1em;
+        }
+
         html.light .hero-bloom .hb-title {
           color: #ff4bae;
           text-shadow: none;
@@ -281,6 +288,10 @@ function Hero() {
         html.light .hero-bloom .hb-description {
           color: #ffffff;
           text-shadow: none;
+        }
+
+        html.light .hero-bloom .hb-description .hb-em {
+          background: linear-gradient(transparent 62%, #ff90c6 62%);
         }
 
         html.light .hero-bloom .hb-greet {
@@ -379,20 +390,20 @@ function Hero() {
           <div
             ref={copyRef}
             className="mr-auto flex flex-col items-start text-left gap-4
-           max-w-xs sm:max-w-2xl will-change-transform"
+            max-w-xs sm:max-w-2xl will-change-transform"
           >
             <p
               className="hero-anim hb-greet text-lg sm:text-[22px]
-                         font-medium font-generalsans"
+              font-medium font-generalsans"
               style={{ animationDelay: "0.1s" }}
             >
-              Hi, I'm Chahd Fadhlaoui 
+              Hi, I'm Chahd Fadhlaoui
             </p>
 
             <h1
               className="hero-anim hb-title text-2xl sm:text-4xl
-                         font-bold leading-[1.08] tracking-tight
-                         font-generalsans"
+              font-bold leading-[1.08] tracking-tight
+              font-generalsans"
               style={{ animationDelay: "0.28s" }}
             >
               Software Engineering
@@ -402,17 +413,26 @@ function Hero() {
 
             <p
               className="hero-anim hb-subtitle text-[13px] sm:text-[20px]
-                         font-semibold tracking-[0.08em]"
+              font-semibold tracking-[0.08em]"
               style={{ animationDelay: "0.38s" }}
             >
               FULL-STACK DEVELOPMENT <span>·</span> DEVOPS <span>·</span> SRE
             </p>
 
+            {/* Updated professional introduction */}
             <p
               className="hero-anim hb-description font-normal"
               style={{ animationDelay: "0.48s" }}
             >
-             I build web and mobile applications and am expanding my expertise in DevOps and Site Reliability Engineering through hands-on projects.
+              I'm a Software Engineering student specializing in{" "}
+              <strong className="hb-em">
+                DevOps and Site Reliability Engineering
+              </strong>
+              , with a background in{" "}
+              <strong className="hb-em">
+                web and mobile application development
+              </strong>
+              .
             </p>
           </div>
         </div>
@@ -437,7 +457,6 @@ function Hero() {
           className="w-fit hero-anim"
           style={{ animationDelay: "0.5s" }}
         >
- 
         </a>
       </div>
     </section>
