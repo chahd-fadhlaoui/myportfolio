@@ -5,6 +5,7 @@ import Projects from './sections/Projects';
 import Contact from './sections/Contact';
 import Footer from './sections/Footer';
 import StarField from './components/Starfield';
+import MyBackground from './sections/Mybackgound';
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
 
       <div className="max-w-7xl mx-auto">
         <About />
+        <MyBackground />
         <Projects />
         <Contact />
         <Footer />

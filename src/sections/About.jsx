@@ -1,1183 +1,678 @@
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import Globe from "react-globe.gl";
+import React, { useEffect, useRef, useState } from "react";
 
 /* ------------------------------------------------------------------ */
-/* Styles                                                             */
+/* Styles                                                              */
 /* ------------------------------------------------------------------ */
 
 const STYLES = `
-@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Mono:wght@400;500&display=swap");
 
-.ed-root {
-  --ed-paper: #fff8ed;
-  --ed-ink: #17121a;
-  --ed-pink: #ff82bd;
-  --ed-pink-light: #ffc1df;
-  --ed-yellow: #ffe45c;
-  --ed-mint: #a7efd3;
-  --ed-lilac: #d8c8ff;
-  --ed-orange: #ffad79;
-  --ed-line: 2.5px;
-  --ed-pad: clamp(1rem, 3vw, 2.25rem);
-  --ed-media-h: clamp(230px, 24vw, 320px);
-  --ed-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  --ed-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+.ab-root {
+  --ab-paper: #fff8ed;
+  --ab-ink: #17121a;
+  --ab-pink: #ff82bd;
+  --ab-yellow: #ffe45c;
+  --ab-lilac: #bda0ff;
+  --ab-mint: #9ce9c9;
+  --ab-line: 2.5px;
+  --ab-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --ab-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   width: 100%;
   max-width: 1800px;
   margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 2.25rem);
+  padding-top: clamp(4rem, 8vw, 8rem);
   box-sizing: border-box;
+  font-family: var(--ab-display);
 }
 
-/* Main shell */
-.ed-shell {
+/* Main editorial shell */
+.ab-shell {
   position: relative;
   overflow: hidden;
   overflow: clip;
-  padding: var(--ed-pad);
-  border: var(--ed-line) solid var(--ed-ink);
+  padding: clamp(1.1rem, 3vw, 2.5rem);
+  border: var(--ab-line) solid var(--ab-ink);
   border-radius: 36px;
-  color: var(--ed-ink);
-  font-family: var(--ed-display);
-  background-color: var(--ed-paper);
-  background-image: radial-gradient(rgba(23, 18, 26, 0.13) 1.2px, transparent 1.2px);
+  color: var(--ab-ink);
+  background-color: var(--ab-paper);
+  background-image: radial-gradient(
+    rgba(23, 18, 26, 0.12) 1.2px,
+    transparent 1.2px
+  );
   background-size: 22px 22px;
-  box-shadow: 12px 12px 0 var(--ed-pink);
+  box-shadow: 12px 12px 0 var(--ab-pink);
 }
 
 /* Header */
-.ed-head {
+.ab-head {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  margin-bottom: 2.8rem;
-  padding: clamp(1.5rem, 4vw, 3rem);
-  border: var(--ed-line) solid var(--ed-ink);
-  border-radius: 25px;
-  background: var(--ed-pink);
-  box-shadow: 7px 7px 0 var(--ed-yellow);
+  gap: 1.1rem;
+  margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+  padding: clamp(2rem, 5vw, 4.5rem);
+  border: var(--ab-line) solid var(--ab-ink);
+  border-radius: 26px;
+  background: var(--ab-pink);
+  box-shadow: 8px 8px 0 var(--ab-yellow);
 }
 
-.ed-eyebrow {
+.ab-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  font-family: var(--ed-mono);
-  font-size: 0.9rem;
+  gap: 0.7rem;
+  width: fit-content;
+  font-family: var(--ab-mono);
+  font-size: 0.85rem;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
-.ed-eyebrow::before {
+.ab-eyebrow::before {
   content: "";
-  width: 28px;
+  width: 30px;
   height: 3px;
-  background: var(--ed-ink);
+  background: var(--ab-ink);
 }
 
-.ed-title {
-  font-size: clamp(2.5rem, 5.5vw, 4.8rem);
+.ab-title {
+  max-width: 900px;
+  margin: 0;
+  font-size: clamp(3rem, 7vw, 6rem);
   font-weight: 800;
   line-height: 0.98;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.065em;
   text-wrap: balance;
 }
 
-.ed-mark {
+.ab-title-mark {
   display: inline-block;
-  background: var(--ed-yellow);
   padding: 0.02em 0.16em 0.08em;
-  border: 2px solid var(--ed-ink);
-  border-radius: 9px;
-  transform: rotate(-2deg);
+  border: 2px solid var(--ab-ink);
+  border-radius: 10px;
+  background: var(--ab-yellow);
+  transform: rotate(-1.5deg);
 }
 
-/* Layout */
-.ed-layout {
-  display: grid;
-  gap: 2rem;
-}
-
-@media (min-width: 1280px) {
-  .ed-layout {
-    grid-template-columns: 230px minmax(0, 1fr);
-    gap: 2.5rem;
-    align-items: start;
-  }
-}
-
-/* Navigation */
-.ed-aside {
-  display: grid;
-  align-content: start;
-}
-
-.ed-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 1280px) {
-  .ed-aside {
-    position: sticky;
-    top: 1.5rem;
-  }
-
-  .ed-nav {
-    display: grid;
-    gap: 0.7rem;
-  }
-}
-
-.ed-nav a {
+.ab-header-bottom {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.75rem 0.9rem;
-  border: var(--ed-line) solid var(--ed-ink);
-  border-radius: 13px;
-  color: inherit;
-  background: var(--ed-yellow);
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: transform 0.2s ease, background 0.2s ease;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.2rem;
+  padding-top: 1.1rem;
+  border-top: 2px solid rgba(23, 18, 26, 0.35);
 }
 
-.ed-nav li:nth-child(2) a {
-  background: var(--ed-lilac);
+.ab-header-note {
+  font-family: var(--ab-mono);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.ed-nav a span {
-  font-family: var(--ed-mono);
-  font-size: 0.82rem;
-}
-
-.ed-nav a:hover {
-  transform: translateX(4px);
-  background: var(--ed-pink);
-}
-
-.ed-nav a[aria-current="true"] {
-  background: var(--ed-ink);
-  color: white;
-}
-
-/* Main content */
-.ed-main {
+.ab-header-decoration {
   display: grid;
-  gap: 3.5rem;
-  min-width: 0;
-  container-type: inline-size;
-  container-name: ed-main;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border: 2px solid var(--ab-ink);
+  border-radius: 50%;
+  background: var(--ab-yellow);
+  animation: ab-rotate 14s linear infinite;
 }
 
-/* Animated blocks */
-.ed-block {
-  min-width: 0;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+.ab-header-decoration svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: var(--ab-ink);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.ed-block[data-shown="true"] {
-  opacity: 1;
-  transform: none;
-}
-
-.ed-block-head {
+/* Editorial introduction */
+.ab-intro {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
-  margin-bottom: 1.8rem;
+  gap: 1rem;
+  margin: 0 0 2rem;
 }
 
-.ed-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 58px;
-  min-height: 58px;
-  padding: 0.35rem;
-  border: var(--ed-line) solid var(--ed-ink);
+.ab-intro-number {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  flex: none;
+  border: var(--ab-line) solid var(--ab-ink);
   border-radius: 17px;
-  background: var(--ed-yellow);
-  box-shadow: 4px 4px 0 var(--ed-pink);
-  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  background: var(--ab-yellow);
+  box-shadow: 4px 4px 0 var(--ab-pink);
+  font-size: 1.8rem;
   font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.04em;
 }
 
-.ed-rule {
+.ab-intro-line {
   flex: 1;
   height: 3px;
-  border-radius: 2px;
-  background: var(--ed-ink);
+  background: var(--ab-ink);
 }
 
-.ed-label {
-  padding: 0.5rem 0.85rem;
-  border: var(--ed-line) solid var(--ed-ink);
+.ab-intro-label {
+  padding: 0.55rem 0.9rem;
+  border: var(--ab-line) solid var(--ab-ink);
   border-radius: 999px;
-  background: var(--ed-pink);
-  box-shadow: 3px 3px 0 var(--ed-yellow);
-  font-family: var(--ed-mono);
-  font-size: 0.78rem;
+  background: var(--ab-lilac);
+  box-shadow: 3px 3px 0 var(--ab-yellow);
+  font-family: var(--ab-mono);
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-/* Typography */
-.ed-h3 {
-  font-size: clamp(2rem, 3.5vw, 2.8rem);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-}
-
-.ed-h3--sm {
-  font-size: clamp(1.6rem, 2.3vw, 2rem);
-}
-
-.ed-p {
-  max-width: 62ch;
-  margin-top: 1rem;
-  font-size: 1.1rem;
-  line-height: 1.75;
-  opacity: 0.9;
-}
-
-/* Timeline */
-.ed-journey {
+/* Blog-like article layout */
+.ab-article {
   display: grid;
-  gap: 2rem;
+  gap: 1.8rem;
 }
 
-.ed-timeline {
+/* Article panels */
+.ab-story {
   position: relative;
   display: grid;
-  gap: 1.7rem;
-  padding-left: 1.5rem;
-  border-left: 4px solid var(--ed-ink);
-}
-
-.ed-timeline-item {
-  position: relative;
-  display: grid;
-  gap: 0.75rem;
-  min-width: 0;
-  padding: clamp(1.1rem, 2.5vw, 1.8rem);
-  border: var(--ed-line) solid var(--ed-ink);
-  border-radius: 20px;
-  background: white;
-  box-shadow: 5px 5px 0 var(--ed-ink);
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
-}
-
-.ed-timeline-item:hover {
-  transform: translate(-3px, -3px);
-  box-shadow: 8px 8px 0 var(--ed-ink);
-}
-
-.ed-timeline-item:nth-child(1) {
-  background: var(--ed-yellow);
-}
-
-.ed-timeline-item:nth-child(2) {
-  background: var(--ed-pink-light);
-}
-
-.ed-timeline-item:nth-child(3) {
-  background: var(--ed-lilac);
-}
-
-.ed-timeline-item:nth-child(4) {
-  background: var(--ed-mint);
-}
-
-.ed-timeline-item::before {
-  content: "";
-  position: absolute;
-  top: 1.35rem;
-  left: -2.05rem;
-  width: 16px;
-  height: 16px;
-  border: 3px solid var(--ed-ink);
-  border-radius: 50%;
-  background: var(--ed-pink);
-  box-shadow: 0 0 0 4px var(--ed-paper);
-}
-
-.ed-timeline-item[data-type="education"]::before {
-  background: var(--ed-yellow);
-}
-
-.ed-timeline-item[data-type="internship"]::before {
-  background: var(--ed-pink);
-}
-
-.ed-timeline-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.8rem;
-  font-family: var(--ed-mono);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.ed-timeline-date {
-  font-weight: 700;
-}
-
-.ed-timeline-tag {
-  padding: 0.3rem 0.7rem;
-  border: 2px solid var(--ed-ink);
-  border-radius: 999px;
-  background: var(--ed-ink);
-  color: white;
-  font-size: 0.72rem;
-}
-
-.ed-timeline-item h4 {
-  font-size: clamp(1.35rem, 2vw, 1.85rem);
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.025em;
-}
-
-.ed-timeline-place {
-  font-family: var(--ed-mono);
-  font-size: 0.88rem;
-  font-weight: 600;
-}
-
-.ed-timeline-description {
-  font-size: 1rem;
-  line-height: 1.75;
-  opacity: 0.95;
-}
-
-.ed-timeline-description ul {
-  display: grid;
-  gap: 0.55rem;
-  margin: 0.7rem 0 0;
-  padding-left: 1.2rem;
-  list-style: disc;
-}
-
-.ed-timeline-description li {
-  padding-left: 0.2rem;
-}
-
-.ed-timeline-note {
-  margin-top: 0.5rem;
-  padding: 0.8rem 1rem;
-  border: 2px solid var(--ed-ink);
-  border-radius: 12px;
-  background: var(--ed-yellow);
-  font-family: var(--ed-mono);
-  font-size: 0.78rem;
-  line-height: 1.6;
-}
-
-.ed-timeline-item:nth-child(even) .ed-timeline-note {
-  background: white;
-}
-
-/* Internship technologies */
-.ed-tech-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: 0.65rem;
-}
-
-.ed-tech-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.45rem 0.75rem;
-  border: 2px solid var(--ed-ink);
-  border-radius: 11px;
-  background: white;
-  box-shadow: 2px 2px 0 var(--ed-ink);
-  font-family: var(--ed-mono);
-  font-size: 0.78rem;
-  font-weight: 500;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.ed-tech-item:nth-child(odd) {
-  background: var(--ed-yellow);
-}
-
-.ed-tech-item:nth-child(even) {
-  background: white;
-}
-
-.ed-tech-item:hover {
-  background: var(--ed-pink);
-  transform: translateY(-3px) rotate(-1deg);
-}
-
-.ed-tech-item img {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-/* Location section */
-.ed-split {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2rem;
-}
-
-@container ed-main (min-width: 560px) {
-  .ed-split {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: center;
-    gap: 2rem;
-  }
-}
-
-.ed-globe-stage {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: var(--ed-media-h);
-  overflow: hidden;
-  border: var(--ed-line) solid var(--ed-ink);
+  grid-template-columns: 105px minmax(0, 1fr);
+  gap: clamp(1.2rem, 3vw, 2.5rem);
+  align-items: start;
+  padding: clamp(1.5rem, 3.5vw, 3rem);
+  border: var(--ab-line) solid var(--ab-ink);
   border-radius: 24px;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(255, 130, 189, 0.9), transparent 40%),
-    radial-gradient(circle at 80% 85%, rgba(255, 228, 92, 0.85), transparent 45%),
-    #17121a;
-  box-shadow: 8px 8px 0 var(--ed-yellow);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: var(--ab-ink);
+  box-shadow: 6px 6px 0 var(--ab-ink);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.ab-story:nth-child(1) {
+  background: #ffe45c;
+}
+
+.ab-story:nth-child(2) {
+  background: #ff82bd;
+}
+
+.ab-story:nth-child(3) {
+  background: #bda0ff;
 }
 
 @media (hover: hover) {
-  .ed-globe-stage:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 11px 11px 0 var(--ed-pink);
+  .ab-story:hover {
+    transform: translateY(-5px);
+    box-shadow: 9px 11px 0 var(--ab-ink);
   }
 }
 
-.ed-globe {
-  width: min(100%, calc(var(--ed-media-h) - var(--ed-line) * 2));
-  aspect-ratio: 1 / 1;
-  cursor: grab;
+/* Icon column */
+.ab-story-icon {
+  position: sticky;
+  top: 2rem;
+  display: grid;
+  place-items: center;
+  width: 100px;
+  height: 100px;
+  border: 2.5px solid var(--ab-ink);
+  border-radius: 23px;
+  background: var(--ab-paper);
+  box-shadow: 5px 5px 0 var(--ab-ink);
+  transition: transform 0.3s ease;
 }
 
-.ed-globe:active {
-  cursor: grabbing;
+.ab-story:nth-child(2) .ab-story-icon {
+  background: var(--ab-yellow);
 }
 
-.ed-pin {
-  position: absolute;
-  left: 50%;
-  bottom: 0.8rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transform: translateX(-50%);
-  padding: 0.4rem 0.9rem;
-  border: var(--ed-line) solid var(--ed-ink);
-  border-radius: 999px;
-  background: var(--ed-yellow);
-  color: var(--ed-ink);
-  font-family: var(--ed-mono);
-  font-size: 0.82rem;
-  font-weight: 500;
-  white-space: nowrap;
-  box-shadow: 3px 3px 0 var(--ed-pink);
+.ab-story:nth-child(3) .ab-story-icon {
+  background: var(--ab-mint);
 }
 
-.ed-dot {
-  position: relative;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #0a8f5a;
+.ab-story:hover .ab-story-icon {
+  transform: rotate(-6deg) scale(1.05);
 }
 
-.ed-dot::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: inherit;
-  animation: ed-ping 1.8s ease-out infinite;
+.ab-story-icon svg {
+  width: 46px;
+  height: 46px;
+  fill: none;
+  stroke: var(--ab-ink);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.ed-pin .ed-dot {
-  background: var(--ed-pink);
+/* Article content */
+.ab-story-content {
+  min-width: 0;
 }
 
-.ed-split > div:last-child {
-  padding: clamp(1.2rem, 3vw, 2rem);
-  border: var(--ed-line) solid var(--ed-ink);
-  border-radius: 20px;
-  background: var(--ed-pink);
-  box-shadow: 6px 6px 0 var(--ed-yellow);
-}
-
-.ed-split .ed-h3 {
-  display: inline;
-  background: var(--ed-yellow);
-  padding: 0 0.15em;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
-
-.ed-split .ed-p {
-  font-weight: 500;
-}
-
-@keyframes ed-ping {
-  0% { transform: scale(1); opacity: 0.7; }
-  100% { transform: scale(3); opacity: 0; }
-}
-
-/* Ticker */
-.ed-marquee {
+.ab-story-meta {
   display: flex;
-  margin: 2.5rem calc(var(--ed-pad) * -1) calc(var(--ed-pad) * -1);
-  overflow: hidden;
-  border-top: var(--ed-line) solid var(--ed-ink);
-  background: var(--ed-pink);
-  color: var(--ed-ink);
-}
-
-.ed-track {
-  display: flex;
-  flex: 0 0 auto;
-  min-width: 100%;
-  animation: ed-scroll 28s linear infinite;
-}
-
-.ed-marquee:hover .ed-track {
-  animation-play-state: paused;
-}
-
-.ed-item {
-  display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1.5rem;
-  padding: 0.9rem 0 0.9rem 1.5rem;
-  font-family: var(--ed-mono);
-  font-size: 0.95rem;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.ab-story-number {
+  font-family: var(--ab-mono);
+  font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.1em;
+}
+
+.ab-story-tag {
+  padding: 0.38rem 0.8rem;
+  border: 2px solid var(--ab-ink);
+  border-radius: 999px;
+  background: var(--ab-ink);
+  color: white;
+  font-family: var(--ab-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 
-.ed-item::after {
-  content: "\\2733";
-  color: var(--ed-ink);
-  font-size: 1.2rem;
+.ab-story-title {
+  margin: 0;
+  font-size: clamp(1.9rem, 3.4vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+  color: var(--ab-ink);
 }
 
-@keyframes ed-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-100%); }
+.ab-story-divider {
+  width: 65px;
+  height: 4px;
+  margin: 1.2rem 0;
+  border-radius: 5px;
+  background: var(--ab-ink);
+}
+
+.ab-story-text {
+  max-width: 75ch;
+  margin: 0;
+  color: #211824;
+  font-size: 25px;
+  font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: -0.015em;
+}
+
+/* Reveal animation */
+.ab-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.ab-reveal[data-shown="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Decorative animation */
+@keyframes ab-rotate {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive */
+@media (max-width: 900px) {
+  .ab-story {
+    grid-template-columns: 75px minmax(0, 1fr);
+    gap: 1.3rem;
+  }
+
+  .ab-story-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 17px;
+  }
+
+  .ab-story-icon svg {
+    width: 35px;
+    height: 35px;
+  }
+
+  .ab-story-text {
+    font-size: 21px;
+  }
+}
+
 @media (max-width: 640px) {
-  .ed-shell {
-    border-radius: 24px;
-    box-shadow: 7px 7px 0 var(--ed-pink);
+  .ab-root {
+    padding-top: 3.5rem;
   }
 
-  .ed-head {
-    border-radius: 18px;
-    box-shadow: 4px 4px 0 var(--ed-yellow);
-  }
-
-  .ed-title {
-    font-size: clamp(2.4rem, 11vw, 3.5rem);
-  }
-
-  .ed-main {
-    gap: 2.5rem;
-  }
-
-  .ed-block-head {
-    gap: 0.55rem;
-  }
-
-  .ed-num {
-    min-width: 46px;
-    min-height: 46px;
-    border-radius: 13px;
-    font-size: 1.6rem;
-  }
-
-  .ed-label {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.65rem;
-    letter-spacing: 0.04em;
-  }
-
-  .ed-timeline {
-    padding-left: 1.2rem;
-    gap: 1.5rem;
-  }
-
-  .ed-timeline-item {
+  .ab-shell {
     padding: 1rem;
-    border-radius: 16px;
-    box-shadow: 3px 3px 0 var(--ed-ink);
+    border-radius: 24px;
+    box-shadow: 7px 7px 0 var(--ab-pink);
   }
 
-  .ed-timeline-item::before {
-    left: -1.72rem;
-    width: 13px;
-    height: 13px;
+  .ab-head {
+    padding: 1.6rem;
+    margin-bottom: 2.2rem;
+    border-radius: 18px;
+    box-shadow: 5px 5px 0 var(--ab-yellow);
   }
 
-  .ed-timeline-description {
-    font-size: 0.95rem;
+  .ab-title {
+    font-size: clamp(2.5rem, 10vw, 3.8rem);
   }
 
-  .ed-tech-item {
-    font-size: 0.72rem;
+  .ab-header-bottom {
+    margin-top: 0.7rem;
   }
 
-  .ed-tech-item img {
+  .ab-header-note {
+    font-size: 0.63rem;
+  }
+
+  .ab-header-decoration {
+    width: 36px;
+    height: 36px;
+  }
+
+  .ab-header-decoration svg {
     width: 19px;
     height: 19px;
   }
 
-  .ed-pin {
-    font-size: 0.72rem;
+  .ab-intro {
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ab-intro-number {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    font-size: 1.45rem;
+  }
+
+  .ab-intro-label {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.61rem;
+  }
+
+  .ab-article {
+    gap: 1.3rem;
+  }
+
+  .ab-story {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+    padding: 1.3rem;
+    border-radius: 18px;
+    box-shadow: 4px 4px 0 var(--ab-ink);
+  }
+
+  .ab-story-icon {
+    position: static;
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    box-shadow: 3px 3px 0 var(--ab-ink);
+  }
+
+  .ab-story-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .ab-story-title {
+    font-size: 1.7rem;
+  }
+
+  .ab-story-divider {
+    margin: 0.9rem 0;
+    width: 48px;
+  }
+
+  .ab-story-text {
+    font-size: 18px;
+    line-height: 1.75;
+  }
+
+  .ab-story-meta {
+    margin-bottom: 0.75rem;
   }
 }
 
-/* Focus and reduced motion */
-.ed-root :is(a, button):focus-visible {
-  outline: 3px solid var(--ed-pink);
-  outline-offset: 3px;
-}
-
+/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .ed-block,
-  .ed-tech-item,
-  .ed-globe-stage,
-  .ed-timeline-item {
+  .ab-reveal {
+    opacity: 1;
+    transform: none;
     transition: none;
   }
 
-  .ed-block {
-    opacity: 1;
-    transform: none;
+  .ab-story,
+  .ab-story-icon {
+    transition: none;
   }
 
-  .ed-track,
-  .ed-dot::after {
+  .ab-header-decoration {
     animation: none;
   }
 }
 `;
 
 /* ------------------------------------------------------------------ */
-/* Data                                                               */
+/* Icons                                                               */
 /* ------------------------------------------------------------------ */
 
-const TUNISIA = { lat: 33.89, lng: 9.54 };
+const CodeIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2.5" y="3.5" width="19" height="17" rx="2.5" />
+    <path d="M2.5 8h19" />
+    <path d="m9 12-3 2.5 3 2.5" />
+    <path d="m15 12 3 2.5-3 2.5" />
+  </svg>
+);
 
-const ICON_BASE =
-  "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons";
+const DevOpsIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M4 7h10a3 3 0 0 1 3 3v1" />
+    <path d="m14 4 3 3-3 3" />
+    <path d="M20 17H10a3 3 0 0 1-3-3v-1" />
+    <path d="m10 20-3-3 3-3" />
+    <circle cx="4" cy="7" r="1.5" />
+    <circle cx="20" cy="17" r="1.5" />
+  </svg>
+);
 
-const TICKER = [
-  "React",
-  "Node.js",
-  "MongoDB",
-  "Docker",
-  "Kubernetes",
-  "CI/CD",
-  "DevOps",
-  "Site Reliability",
-];
+const ShieldIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" />
+    <path d="m9 12 2 2 4-4" />
+    <path d="M12 7v1" />
+  </svg>
+);
 
-const SECTIONS = [
-  { id: "ed-journey", n: "01", label: "Professional Background" },
-  { id: "ed-remote", n: "02", label: "Location" },
-];
-
-/* ------------------------------------------------------------------ */
-/* Reusable technology icons                                          */
-/* ------------------------------------------------------------------ */
-
-const technologies = {
-  React: "react/react-original.svg",
-  "Node.js": "nodejs/nodejs-original.svg",
-  Express: "express/express-original.svg",
-  MongoDB: "mongodb/mongodb-original.svg",
-};
-
-const TechList = ({ items }) => (
-  <div className="ed-tech-list" aria-label="Technologies used">
-    {items.map((name) => (
-      <span className="ed-tech-item" key={name}>
-        {technologies[name] && (
-          <img
-            src={`${ICON_BASE}/${technologies[name]}`}
-            alt=""
-            width="23"
-            height="23"
-            loading="lazy"
-          />
-        )}
-        {name}
-      </span>
-    ))}
-  </div>
+const SparkIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="m12 2 1.8 7.2L21 12l-7.2 1.8L12 21l-1.8-7.2L3 12l7.2-2.8L12 2Z" />
+    <path d="m19 14 1 3 2 1-2 1-1 3-1-3-2-1 2-1 1-3Z" />
+  </svg>
 );
 
 /* ------------------------------------------------------------------ */
-/* Reusable animated block                                            */
+/* Scroll reveal                                                       */
 /* ------------------------------------------------------------------ */
 
-const Block = ({ id, n, label, children }) => {
+const Reveal = ({ children, delay = 0 }) => {
   const ref = useRef(null);
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const element = ref.current;
+    if (!element) return;
 
-    if (typeof IntersectionObserver === "undefined") {
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      typeof IntersectionObserver === "undefined"
+    ) {
       setShown(true);
       return;
     }
 
-    const io = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setShown(true);
-          io.disconnect();
+          observer.disconnect();
         }
       },
       { threshold: 0.12 }
     );
 
-    io.observe(el);
-    return () => io.disconnect();
+    observer.observe(element);
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <article
-      id={id}
+    <div
       ref={ref}
+      className="ab-reveal"
       data-shown={shown}
-      aria-label={label}
-      className="ed-block"
+      style={{ transitionDelay: `${delay}ms` }}
     >
-      <div className="ed-block-head">
-        <span className="ed-num">{n}</span>
-        <span className="ed-rule" aria-hidden="true" />
-        <span className="ed-label">{label}</span>
-      </div>
-
       {children}
-    </article>
-  );
-};
-
-/* ------------------------------------------------------------------ */
-/* Tunisia globe                                                      */
-/* ------------------------------------------------------------------ */
-
-const LocationGlobe = () => {
-  const wrapRef = useRef(null);
-  const globeRef = useRef(null);
-  const [size, setSize] = useState(300);
-
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
-
-    const ro = new ResizeObserver(([entry]) => {
-      setSize(Math.max(200, Math.round(entry.contentRect.width)));
-    });
-
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const handleReady = useCallback(() => {
-    const globe = globeRef.current;
-    if (!globe) return;
-
-    const reduceMotion = window.matchMedia?.(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-    const controls = globe.controls();
-    controls.autoRotate = !reduceMotion;
-    controls.autoRotateSpeed = 0.7;
-    controls.enableZoom = false;
-
-    globe.pointOfView({ ...TUNISIA, altitude: 2.1 }, 0);
-  }, []);
-
-  return (
-    <div ref={wrapRef} className="ed-globe">
-      <Globe
-        ref={globeRef}
-        width={size}
-        height={size}
-        onGlobeReady={handleReady}
-        backgroundColor="rgba(0,0,0,0)"
-        showAtmosphere
-        atmosphereColor="#ffb5d8"
-        atmosphereAltitude={0.18}
-        showGraticules
-        globeImageUrl="https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg"
-        bumpImageUrl="https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png"
-        pointsData={[TUNISIA]}
-        pointColor={() => "#ffe45c"}
-        pointAltitude={0.1}
-        pointRadius={0.55}
-        ringsData={[TUNISIA]}
-        ringColor={() => (t) => `rgba(255,228,92,${1 - t})`}
-        ringMaxRadius={5}
-        ringPropagationSpeed={2}
-        ringRepeatPeriod={1400}
-      />
     </div>
   );
 };
 
 /* ------------------------------------------------------------------ */
-/* Main component                                                     */
+/* Article content                                                     */
+/* ------------------------------------------------------------------ */
+
+const STORIES = [
+  {
+    number: "01",
+    tag: "The Foundation",
+    title: "Where It All Started",
+    Icon: CodeIcon,
+    text:
+      "My journey started with web development, working with technologies such as React, Node.js, Express, and MongoDB to build web applications. As I gained experience, I became increasingly curious about what happens beyond the application itself — how systems operate behind the scenes, how applications are deployed, and how everything works together.",
+  },
+  {
+    number: "02",
+    tag: "The Exploration",
+    title: "Discovering DevOps",
+    Icon: DevOpsIcon,
+    text:
+      "This curiosity led me to explore DevOps, particularly CI/CD, automation, and infrastructure.",
+  },
+  {
+    number: "03",
+    tag: "The Next Dimension",
+    title: "Understanding Reliability",
+    Icon: ShieldIcon,
+    text:
+      "As I progressed through my engineering studies, I also discovered Site Reliability Engineering (SRE) and the importance of building and maintaining reliable systems. Today, I am focusing on developing my skills in DevOps and SRE, while building on my foundation in software development.",
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* Main component                                                      */
 /* ------------------------------------------------------------------ */
 
 const About = () => {
-  const [active, setActive] = useState(SECTIONS[0].id);
-
-  /* Highlight the section currently in view */
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) setActive(entry.target.id);
-        });
-      },
-      { rootMargin: "-35% 0px -55% 0px" }
-    );
-
-    SECTIONS.forEach(({ id }) => {
-      const el = document.getElementById(id);
-      if (el) io.observe(el);
-    });
-
-    return () => io.disconnect();
-  }, []);
-
-  const goTo = (e, id) => {
-    e.preventDefault();
-
-    const reduce = window.matchMedia?.(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-    document.getElementById(id)?.scrollIntoView({
-      behavior: reduce ? "auto" : "smooth",
-      block: "center",
-    });
-  };
-
   return (
     <section
-      className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 my-20 ed-root"
-      id="about"
+      className="ab-root"
+      id="about-me"
+      aria-labelledby="ab-title"
     >
       <style>{STYLES}</style>
 
-      <div className="ed-shell">
-        <header className="ed-head">
-          <span className="ed-eyebrow">My Background</span>
+      <div className="ab-shell">
+        <Reveal>
+          <header className="ab-head">
+            <span className="ab-eyebrow">About me / 01</span>
 
-          <h2 className="ed-title">
-            Learn. Build.{" "}
-            <span className="ed-mark">Grow.</span>
-          </h2>
-        </header>
+            <h2 className="ab-title" id="ab-title">
+              Beyond{" "}
+              <span className="ab-title-mark">
+                Web Development
+              </span>
+            </h2>
 
-        <div className="ed-layout">
-          {/* Navigation */}
-          <aside className="ed-aside">
-            <ul className="ed-nav" aria-label="Jump to section">
-              {SECTIONS.map(({ id, n, label }) => (
-                <li key={id}>
-                  <a
-                    href={`#${id}`}
-                    onClick={(e) => goTo(e, id)}
-                    aria-current={active === id ? "true" : undefined}
-                  >
-                    <span>{n}</span>
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </aside>
+            <div className="ab-header-bottom">
+              <span className="ab-header-note">
+                Software · Systems · Reliability
+              </span>
 
-          {/* Main content */}
-          <div className="ed-main">
-
-            {/* 01 — Professional Background */}
-            <Block
-              id="ed-journey"
-              n="01"
-              label="Professional Background"
-            >
-              <div className="ed-journey">
-                <div className="ed-timeline">
-
-                  {/* Current engineering studies */}
-                  <article
-                    className="ed-timeline-item"
-                    data-type="education"
-                  >
-                    <div className="ed-timeline-meta">
-                      <span className="ed-timeline-date">
-                        2026 – Present
-                      </span>
-
-                      <span className="ed-timeline-tag">
-                        Current studies
-                      </span>
-                    </div>
-
-                    <h4>
-                      Engineering Cycle in DevOps & Site Reliability Engineering
-                    </h4>
-
-                    <p className="ed-timeline-place">
-                      Horizon Digital School · Sousse, Tunisia
-                    </p>
-
-                    <p className="ed-timeline-description">
-                      Second-year Engineering student, currently building
-                      advanced skills in DevOps practices, infrastructure
-                      automation, CI/CD, containerization, and Site Reliability
-                      Engineering.
-                    </p>
-                  </article>
-
-                  {/* PawFriend internship */}
-                  <article
-                    className="ed-timeline-item"
-                    data-type="internship"
-                  >
-                    <div className="ed-timeline-meta">
-                      <span className="ed-timeline-date">
-                        03/03/2025 – 17/06/2025
-                      </span>
-
-                      <span className="ed-timeline-tag">
-                        Final-year internship
-                      </span>
-                    </div>
-
-                    <h4>
-                      Full-Stack Developer — PawFriend
-                    </h4>
-
-                    <p className="ed-timeline-place">
-                      Evast'In · Tunis, Tunisia
-                    </p>
-
-                    <div className="ed-timeline-description">
-                      <p>
-                        Designed and developed PawFriend, a web platform
-                        dedicated to pet adoption and appointment booking
-                        with veterinarians and trainers.
-                      </p>
-
-                      <ul>
-                        <li>
-                          Developed a Full-Stack application using React,
-                          Node.js, Express, and MongoDB.
-                        </li>
-
-                        <li>
-                          Implemented role-based access control (RBAC)
-                          for Administrators, Veterinarians, Trainers,
-                          and Pet Owners.
-                        </li>
-
-                        <li>
-                          Collaborated in a two-person team using
-                          Agile/Scrum, organized into six sprints
-                          with incremental releases.
-                        </li>
-                      </ul>
-                    </div>
-
-                    <TechList
-                      items={["React", "Node.js", "Express", "MongoDB"]}
-                    />
-
-                    <p className="ed-timeline-note">
-                      Final-year project completed as part of my Applied
-                      Bachelor's degree at ISET Nabeul.
-                    </p>
-                  </article>
-
-                  {/* Reference Print internship */}
-                  <article
-                    className="ed-timeline-item"
-                    data-type="internship"
-                  >
-                    <div className="ed-timeline-meta">
-                      <span className="ed-timeline-date">
-                        01/2024 – 02/2024
-                      </span>
-
-                      <span className="ed-timeline-tag">
-                        Improvement internship
-                      </span>
-                    </div>
-
-                    <h4>
-                      Full-Stack Web Developer
-                    </h4>
-
-                    <p className="ed-timeline-place">
-                      Reference Print · Menzah 9, Tunisia
-                    </p>
-
-                    <div className="ed-timeline-description">
-                      <p>
-                        Developed a digital printing web platform using
-                        the MERN stack.
-                      </p>
-
-                      <ul>
-                        <li>
-                          Built frontend interfaces using React.
-                        </li>
-
-                        <li>
-                          Developed backend APIs using Node.js and Express.
-                        </li>
-
-                        <li>
-                          Integrated MongoDB for application data management.
-                        </li>
-                      </ul>
-                    </div>
-
-                    <TechList
-                      items={["React", "Node.js", "Express", "MongoDB"]}
-                    />
-
-                    <p className="ed-timeline-note">
-                      Internship completed during my Applied Bachelor's
-                      studies at ISET Nabeul.
-                    </p>
-                  </article>
-
-                  {/* ISET degree */}
-                  <article
-                    className="ed-timeline-item"
-                    data-type="education"
-                  >
-                    <div className="ed-timeline-meta">
-                      <span className="ed-timeline-date">
-                        2022 – 2025
-                      </span>
-
-                      <span className="ed-timeline-tag">
-                        Bachelor's degree
-                      </span>
-                    </div>
-
-                    <h4>
-                      Applied Bachelor's Degree in Information Technologies
-                    </h4>
-
-                    <p className="ed-timeline-place">
-                      Higher Institute of Technological Studies of Nabeul
-                      (ISET) · Nabeul, Tunisia
-                    </p>
-
-                    <p className="ed-timeline-description">
-                      Information Systems Development specialization.
-                      Developed a solid foundation in software development,
-                      database management, web technologies, and application
-                      design.
-                    </p>
-                  </article>
-
-                </div>
-              </div>
-            </Block>
-
-            {/* 02 — Location */}
-            <Block
-              id="ed-remote"
-              n="02"
-              label="Location"
-            >
-              <div className="ed-split">
-                <div className="ed-globe-stage">
-                  <LocationGlobe />
-
-                  <span className="ed-pin">
-                    <span className="ed-dot" aria-hidden="true" />
-                    Tunisia · UTC+1
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className="ed-h3 ed-h3--sm">
-                    Based in Tunisia
-                  </h3>
-
-                  <p className="ed-p">
-                    I'm based in Tunisia and open to remote work
-                    opportunities worldwide.
-                  </p>
-                </div>
-              </div>
-            </Block>
-
-          </div>
-        </div>
-
-        {/* Ticker */}
-        <div className="ed-marquee" aria-hidden="true">
-          {[0, 1].map((copy) => (
-            <div className="ed-track" key={copy}>
-              {TICKER.map((word) => (
-                <span className="ed-item" key={`${copy}-${word}`}>
-                  {word}
-                </span>
-              ))}
+              <span className="ab-header-decoration" aria-hidden="true">
+                <SparkIcon />
+              </span>
             </div>
+          </header>
+        </Reveal>
+
+        <Reveal delay={100}>
+          <div className="ab-intro">
+            <span className="ab-intro-number">01</span>
+            <span className="ab-intro-line" aria-hidden="true" />
+            <span className="ab-intro-label">
+              Professional Direction
+            </span>
+          </div>
+        </Reveal>
+
+        <div className="ab-article">
+          {STORIES.map(({ number, tag, title, Icon, text }, index) => (
+            <Reveal key={number} delay={160 + index * 140}>
+              <article className="ab-story">
+                <div className="ab-story-icon">
+                  <Icon />
+                </div>
+
+                <div className="ab-story-content">
+                  <div className="ab-story-meta">
+                    <span className="ab-story-number">
+                      CHAPTER {number}
+                    </span>
+                    <span className="ab-story-tag">{tag}</span>
+                  </div>
+
+                  <h3 className="ab-story-title">{title}</h3>
+
+                  <div
+                    className="ab-story-divider"
+                    aria-hidden="true"
+                  />
+
+                  <p className="ab-story-text">{text}</p>
+                </div>
+              </article>
+            </Reveal>
           ))}
         </div>
       </div>

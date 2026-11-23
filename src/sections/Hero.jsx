@@ -169,24 +169,56 @@ function Hero() {
           background: var(--hb-bg);
         }
 
-        html.light .hero-bloom {
-          --hb-bg: #ffe9f1;
-          --hb-tint: linear-gradient(180deg, rgba(255,214,231,0.16), rgba(255,233,241,0.08));
-          --hb-top-v: linear-gradient(to bottom, rgba(255,226,238,0.90) 0%, rgba(255,226,238,0.55) 55%, rgba(255,226,238,0) 100%);
-          --hb-top-h: linear-gradient(100deg, rgba(255,226,238,0.90) 0%, rgba(255,226,238,0.58) 30%, rgba(255,226,238,0) 56%);
-          --hb-bottom: linear-gradient(to top, rgba(255,226,238,0.92) 0%, rgba(255,226,238,0.78) 45%, rgba(255,226,238,0) 100%);
-          --hb-greet: #8f1d54;
-          --hb-title: #3a1030;
-          --hb-title-shadow: 0 1px 0 rgba(255,255,255,0.6);
-          --hb-glow-core: rgba(255,170,205,0.34);
-          --hb-glow-mid: rgba(255,198,222,0.14);
-          --hb-glow-blend: normal;
-          --hb-pill-bg: rgba(255,255,255,0.78);
-          --hb-pill-fg: #7a1f4d;
-          --hb-pill-ring: rgba(214,92,148,0.32);
-          --hb-dot: #d65c94;
-          --hb-accent: #c9487f;
-        }
+       
+html.light .hero-bloom {
+  --hb-bg: #241f2e;
+
+  /* Almost transparent: preserve the animated scene */
+  --hb-tint: linear-gradient(
+    180deg,
+    rgba(255, 214, 231, 0.025),
+    rgba(255, 233, 241, 0.015)
+  );
+
+  /* Minimal overlays so the character stays visible */
+  --hb-top-v: linear-gradient(
+    to bottom,
+    rgba(26, 12, 30, 0.18) 0%,
+    rgba(26, 12, 30, 0.06) 55%,
+    transparent 100%
+  );
+
+  --hb-top-h: linear-gradient(
+    100deg,
+    rgba(26, 12, 30, 0.30) 0%,
+    rgba(26, 12, 30, 0.10) 30%,
+    transparent 56%
+  );
+
+  --hb-bottom: linear-gradient(
+    to top,
+    rgba(26, 12, 30, 0.48) 0%,
+    rgba(26, 12, 30, 0.20) 45%,
+    transparent 100%
+  );
+
+  --hb-greet: #fe76b8;
+  --hb-title: #ffffff;
+  --hb-title-shadow: 0 3px 14px rgba(0, 0, 0, 0.45);
+
+  /* Original pink glow, reduced intensity */
+  --hb-glow-core: rgba(255, 182, 213, 0.20);
+  --hb-glow-mid: rgba(244, 166, 195, 0.07);
+  --hb-glow-blend: screen;
+
+  --hb-pill-bg: rgba(26, 12, 30, 0.72);
+  --hb-pill-fg: #ffd9e8;
+  --hb-pill-ring: rgba(255, 182, 213, 0.35);
+
+  --hb-dot: #ffb6d5;
+  --hb-accent: #ffb6d5;
+}
+
 
         .hero-bloom .hb-tint,
         .hero-bloom .hb-top,
